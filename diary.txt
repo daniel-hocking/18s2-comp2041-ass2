@@ -1,1 +1,1 @@
-13/10/18     18:00   18:15   put the first real entry in diary.txt (delete this line!)
+14/10/18  9:30  10:50   Setup   Get project environment setup and see if the backend/frontend runs as expected, start trying to understand project structure
