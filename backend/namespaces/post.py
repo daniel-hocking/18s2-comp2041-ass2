@@ -142,14 +142,14 @@ class Post(Resource):
     @posts.doc(description='''
         Lets you fetch a post referenced by 'id'.
         id must be supplied and valid, the request is considered
-        malformed otherwise.\
+        malformed otherwise.
         The returned object contains standard information such as
         the description text, username of the author, and published time
-        as a UNIX Time Stamp.\
+        as a UNIX Time Stamp.
         In addition the meta section of the object contains a list of user id's
-        of the users who have liked the post.\
+        of the users who have liked the post.
         The src is supplied in base64 encoding as is a thumbnail, also base64 encoded.
-        The thumbnail is of size 150px by 150px.\
+        The thumbnail is of size 150px by 150px.
         There is also a list of comments supplied. Each comment has the comment text,
         the username of the author who made the comment and a UNIX timestamp of
         the the comment was posted.

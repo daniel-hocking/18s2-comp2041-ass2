@@ -2,9 +2,9 @@ from app import api
 from flask_restplus import fields
 
 comment_details = api.model('comment_details',{
-    "author": fields.String(),
-    "published": fields.String(),
-    "comment": fields.String()
+    "author": fields.String(example="Becky"),
+    "published": fields.String(example="1539476785.0"),
+    "comment": fields.String(example="Cute Photo!")
 })
 
 token_details = api.model('token_details',{
@@ -19,15 +19,15 @@ post_meta_details = api.model('post_meta_details',{
     "author": fields.String(),
     "description_text": fields.String(),
     "published": fields.String(),
-    "likes": fields.List(fields.Integer()),
-    "comments": fields.List(fields.Nested(comment_details))
+    "likes": fields.List(fields.Integer())
 })
 
 post_details = api.model('post_details',{
   "id": fields.Integer(),
   "meta": fields.Nested(post_meta_details),
   "thumbnail": fields.String(),
-  "src": fields.String()
+  "src": fields.String(),
+  "comments": fields.List(fields.Nested(comment_details))
 })
 
 new_post_details = api.model('new_post_details',{
@@ -42,10 +42,6 @@ post_list_details = api.model('post_list_details',{
 login_details = api.model('login_details', {
   'username': fields.String(required=True, example='xX_greginator_Xx'),
   'password': fields.String(required=True, example='1234'),
-})
-
-comment_details = api.model('comment_details', {
-  'comment': fields.String(required=True, example='Cute photo!')
 })
 
 user_details = api.model('user_details', {

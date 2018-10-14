@@ -342,7 +342,7 @@ class Follow(Resource):
 class UnFollow(Resource):
     @dummy.response(200, 'Success')
     @dummy.response(400, 'Malformed Request')
-    @dummy.param('username','username of person to follow')
+    @dummy.param('username','username of person to unfollow')
     @dummy.doc(description='''
         Identical to PUT /user/unfollow but doesn't require any authentication
         Allows you to act as a "Anon" user.

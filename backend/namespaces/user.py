@@ -162,7 +162,7 @@ class UnFollow(Resource):
     @user.response(403, 'Invalid Auth Token')
     @user.response(400, 'Malformed Request')
     @user.expect(auth_details)
-    @user.param('username','username of person to follow')
+    @user.param('username','username of person to unfollow')
     @user.doc(description='''
         Allows the current user pointed to by the auth token to unfollow
         a specified user. If they are not following the user nothing is done.
@@ -178,10 +178,10 @@ class UnFollow(Resource):
         if to_follow == None or not db.exists('USER').where(username=to_follow):
             abort(400,'Malformed Request Or Unknown username')
         to_follow = db.select('USER').where(username=to_follow).execute()[0]
-        if to_follow in follow_list:
+        if to_follow in following:
             db.raw('UPDATE USERS SET FOLLOWED_NUM = FOLLOWED_NUM - 1 WHERE ID = ?',[to_follow])
-        follow_list.discard(to_follow)
-        db.update('USER').set(following=set_to_text_list(follow_list)).where(id=u_id).execute()
+        following.discard(to_follow)
+        db.update('USER').set(following=set_to_text_list(following)).where(id=u_id).execute()
 
         return {
             'message': 'success'
