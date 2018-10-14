@@ -1,1 +1,2 @@
 14/10/18  9:30  10:50   Setup   Get project environment setup and see if the backend/frontend runs as expected, start trying to understand project structure
+14/10/18  14:00 16:30   Coding  Work on subset0 tasks, basic display of feed and login using local files, some troubleshooting as well due to a browser issue

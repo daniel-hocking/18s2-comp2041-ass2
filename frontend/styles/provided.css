@@ -59,6 +59,18 @@ footer {
     border-bottom: 1px solid rgba(0,0,0,.0975);
 }
 
+.post-footer {
+    padding: 5px;
+}
+
+.post-date {
+    float: right;
+}
+
+.post-like-comments {
+    float: right;
+}
+
 .post-thumb {
     margin: 0;
     padding: 3px;
@@ -92,3 +104,25 @@ footer {
 }
 
 /* Add your styles here */
+.not-auth .req-auth {
+    display: none;
+}
+
+.auth .req-anon {
+    display: none;
+}
+
+.login-form {
+    margin: 20px auto;
+    max-width: 150px;
+    text-align: center;
+}
+
+.login-form input {
+    max-width: 150px;
+}
+
+.login-form input,
+.login-form div {
+    margin: 0 0 10px 0;
+}

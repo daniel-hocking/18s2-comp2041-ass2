@@ -10,6 +10,16 @@ const randomHex = () => randomInteger(256).toString(16);
 /* returns a randomColor */
 export const randomColor = () => '#'+range(3).map(randomHex).join('');
 
+
+export function padNum(num, pad_by = 2, pad_with = '0') {
+    return num.toString().padStart(pad_by, pad_with);
+}
+
+export function formatDate(date_in) {
+    const date_ob = new Date(date_in)
+    return `${padNum(date_ob.getHours())}:${padNum(date_ob.getMinutes())} ${padNum(date_ob.getDate())}/${padNum(date_ob.getMonth()+1)}/${date_ob.getFullYear()}`;
+}
+
 /**
  * You don't have to use this but it may or may not simplify element creation
  * 
@@ -37,10 +47,16 @@ export function createElement(tag, data, options = {}) {
 export function createPostTile(post) {
     const section = createElement('section', null, { class: 'post' });
 
-    section.appendChild(createElement('h2', post.meta.author, { class: 'post-title' }));
+    const post_title = section.appendChild(createElement('h2', post.meta.author, { class: 'post-title' }));
+    post_title.appendChild(createElement('span', formatDate(post.meta.published), { class: 'post-date'}));
 
     section.appendChild(createElement('img', null, 
         { src: '/images/'+post.src, alt: post.meta.description_text, class: 'post-image' }));
+
+    const post_footer = section.appendChild(createElement('div', null, { class: 'post-footer'}));
+    
+    post_footer.appendChild(createElement('span', post.meta.description_text, { class: 'post-desc' }));
+    post_footer.appendChild(createElement('span', `Likes: ${post.meta.likes.length} / Comments: ${post.meta.comments.length}`, { class: 'post-like-comments' }));
 
     return section;
 }

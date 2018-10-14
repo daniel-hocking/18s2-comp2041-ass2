@@ -24,6 +24,10 @@ export default class API {
         return getJSON(`${this.url}/${path}`);
     }
 
+    getUser() {
+        return this.makeAPIRequest('users.json');
+    }
+
     /**
      * @returns feed array in json format
      */

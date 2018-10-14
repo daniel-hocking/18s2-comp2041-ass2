@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html id="html-tag" class="not-auth">
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -14,14 +14,20 @@
     <!-- This is an example app structure --> 
     <header class='banner'>
         <h1>Instacram</h1>
-        <ul class='nav'>
+        <ul class='nav req-auth'>
             <li class="nav-item"><input type="file"/></li>
             <li class='nav-item'>Icon</li>
             <li class='nav-item'>Icon</li>
         </ul>
     </header>
     <main role='main'>
-        <!-- app goes here --> 
+        <!-- app goes here -->
+        <div class="login-form req-anon">
+            <div>Login</div>
+            <input id="login_username" type="text" name="username" placeholder="Username" />
+            <input id="login_password" type="text" name="password" placeholder="Password" />
+            <input id="login_submit" type="button" name="submit" value="Submit" />
+        </div>
         <div id='large-feed'>
             <!-- inject feed data -->
         </div>
