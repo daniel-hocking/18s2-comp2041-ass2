@@ -11,12 +11,16 @@ cd backend
 ```
 
 2. At CSE and an your own computer, you can use virtual env to create a space in which the backend can run without
-clashing with any other python packages and issues on your local account.
+clashing with any other python packages and issues on your local account. 
+
+On your own computer /usr/bin/python3 might need to be replaced by another path, e.g. /usr/local/bin/python3
+
+And you will need python 3.6 or 3.7 on your own computer - python 3.5 or earlier will not work.
 
 ```bash
 cd backend
 # create a sandbox for the backend
-virtualenv -p /usr/local/bin/python3 env
+virtualenv -p /usr/bin/python3 env
 # enter sandbox
 source env/bin/activate
 # set up sandbox
@@ -33,7 +37,7 @@ command to exit the sandbox
 deactivate
 ```
 
-3. At CSE and an your own computer, you can just install the necessary packages.  This risks breaking other application which uses other versions of these packages.
+3. At CSE and an your own computer, you can just install the necessary packages.  This risks breaking other application which uses other versions of these packages (you will need  python 3.6 or 3.7)
 
 ```bash
 cd backend
