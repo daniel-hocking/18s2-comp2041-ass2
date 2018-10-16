@@ -208,6 +208,134 @@
                 });
 
             });
+            describe('Added Checks for each bug fix', function() {
+                // dummy
+                it('PUT dummy/user/follow', function() {
+                    return fetch(`${API_URL}/dummy/user/follow?username=Mia`, {
+                        method: 'PUT'
+                    }).then(response => {
+                        chai.expect(response.status).to.equal(200);
+                    })
+                });
+                it('GET dummy/user', function() {
+                    return fetch(`${API_URL}/dummy/user`).then(response => {
+                        chai.expect(response.status).to.equal(200);
+                        return response.json();
+                    }).then((r)=>{
+                        chai.expect(r.following.includes(10)).to.equal(true);
+                    })
+                });
+                it('PUT dummy/user/unfollow', function() {
+                    return fetch(`${API_URL}/dummy/user/unfollow?username=Mia`, {
+                        method: 'PUT',
+                        body: JSON.stringify({
+
+                        }),
+                    }).then(response => {
+                        chai.expect(response.status).to.equal(200);
+                    })
+                });
+                it('GET dummy/user', function() {
+                    return fetch(`${API_URL}/dummy/user`).then(response => {
+                        chai.expect(response.status).to.equal(200);
+                        return response.json();
+                    }).then((r)=>{
+                        chai.expect(r.following.includes(10)).to.equal(false);
+                    })
+                });
+                it('GET dummy/user/feed', function() {
+                    return fetch(`${API_URL}/dummy/user/feed`).then(response => {
+                        chai.expect(response.status).to.equal(200);
+                        });
+                });
+                // user
+                it('login', function() {
+                    return fetch(`${API_URL}/auth/login`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            username: 'Liam',
+                            password: 'mute'
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        chai.expect(response.status).to.equal(200);
+                        return response.json();
+                    }).then(response => {
+                        auth_token = response["token"];
+                    })
+                });
+                it('PUT /user/follow', function() {
+                    return fetch(`${API_URL}/user/follow?username=Mia`, {
+                        method: 'PUT',
+                        headers: {
+                        'Authorization': `Token ${auth_token}`
+                        }
+
+                    }).then(response => {
+                        chai.expect(response.status).to.equal(200);
+                    })
+                });
+                it('GET /user', function() {
+                    return fetch(`${API_URL}/user`,{
+                        headers: {
+                            'Authorization': `Token ${auth_token}`
+                        }
+                    }).then(response => {
+                        chai.expect(response.status).to.equal(200);
+                        return response.json();
+                    }).then((r)=>{
+                        chai.expect(r.following.includes(10)).to.equal(true);
+                    })
+                });
+                it('PUT /user/unfollow', function() {
+                    return fetch(`${API_URL}/user/unfollow?username=Mia`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Token ${auth_token}`
+                        }
+                    }).then(response => {
+                        chai.expect(response.status).to.equal(200);
+                    })
+                });
+                it('GET /user', function() {
+                    return fetch(`${API_URL}/user`,{
+                                                headers: {
+                            'Authorization': `Token ${auth_token}`
+                        }
+                    }).then(response => {
+                        chai.expect(response.status).to.equal(200);
+                        return response.json();
+                    }).then((r)=>{
+                        chai.expect(r.following.includes(10)).to.equal(false);
+                    })
+                });
+                // feed
+                it('GET /user/feed', function() {
+                    return fetch(`${API_URL}/user/feed`,{
+                        headers: {
+                            'Authorization': `Token ${auth_token}`
+                        }
+                    }).then(response => {
+                        chai.expect(response.status).to.equal(200);
+                        });
+                });
+                // new user endpoint
+                it('GET /user/', function() {
+                    return fetch(`${API_URL}/user?id=10`,{
+                        headers: {
+                            'Authorization': `Token ${auth_token}`
+                        }
+                    }).then(response => {
+                        chai.expect(response.status).to.equal(200);
+                        return response.json();
+                    }).then(response => {
+                        chai.expect(response["username"]).to.equal("Mia");
+                    });
+                });
+            });            
             describe('DUMMY', function() {
                 it('PUT /dummy/user/', function() {
                     return fetch(`${API_URL}/dummy/user/`, {
@@ -354,7 +482,7 @@
                     return fetch(`${API_URL}/dummy/post?id=${post_id}`, {
                         method: 'GET'
                     }).then(response => {
-                        chai.expect(response.status).to.equal(400);
+                        chai.expect(response.status).to.equal(404);
                     })
                 });
             });
@@ -503,7 +631,7 @@
                         'Authorization': `Token ${auth_token}`
                       }
                   }).then(response => {
-                      chai.expect(response.status).to.equal(400);
+                      chai.expect(response.status).to.equal(404);
                   })
               });
             })

@@ -1,6 +1,7 @@
 from app import api,db
 from util.globals import *
 from util.models import *
+from util.request_handling import *
 from flask_restplus import Resource, abort, reqparse, fields
 from flask import request
 auth = api.namespace('auth', description='Authentication Services')
@@ -17,9 +18,8 @@ class Login(Resource):
         to verify the user.
     ''')
     def post(self):
-        if not request.json:
-            abort(400,'Malformed Request')
-        (un,ps) = unpack(request.json,'username','password')
+        j = get_request_json()
+        (un,ps) = unpack(j,'username','password')
         if not db.exists('USER').where(username=un,password=ps):
             abort(403,'Invalid Username/Password')
         t = gen_token()
@@ -41,14 +41,13 @@ class Signup(Resource):
         After creation api retuns a auth token, same as /login would
     ''')
     def post(self):
-        if not request.json:
-            abort(400,'Malformed Request')
-        (un,ps,em,n) = unpack(request.json,'username','password','email','name')
+        j = get_request_json()
+        (un,ps,em,n) = unpack(j,'username','password','email','name')
 
         if db.exists('USER').where(username=un):
             abort(409, 'Username Taken')
         if ps == '':
-            abort(400, 'Malformed Request')
+            abort(400, 'Password cannot be empty')
 
         t = gen_token()
         db_r = db.insert('USER').with_values(

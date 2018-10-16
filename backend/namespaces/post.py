@@ -1,6 +1,7 @@
 from app import api,db
 from util.globals import *
 from util.models import *
+from util.request_handling import *
 from flask_restplus import Resource, abort, reqparse, fields
 from PIL import Image
 from io import BytesIO
@@ -26,14 +27,14 @@ class Post(Resource):
         Returns the post_id of the new post on success.
     ''')
     def post(self):
-        j = request.json
         u = authorize(request)
         u_username = u[1]
-        if not j:
-            abort(400, 'Malformed request')
+        j = get_request_json()
         (desc,src) = unpack(j,'description_text','src')
-        if desc == "" or src == "":
-            abort(400, 'Malformed request')
+        if desc == "":
+            abort(400, "description_text cannot be empty")
+        if src == "":
+            abort(400, "src cannot be empty")
         try:
             size = (150,150)
             im = Image.open(BytesIO(base64.b64decode(src)))
@@ -58,6 +59,7 @@ class Post(Resource):
     @posts.response(200, 'Success')
     @posts.response(403, 'Invalid Auth Token / Unauthorized to edit Post')
     @posts.response(400, 'Malformed Request')
+    @posts.response(404, 'Post Not Found')
     @posts.param('id','the id of the post to update')
     @posts.expect(auth_details,new_post_details)
     @posts.doc(description='''
@@ -71,17 +73,12 @@ class Post(Resource):
         unauthorized error will be raised.
     ''')
     def put(self):
-        j = request.json
-        try:
-            id = int(request.args.get('id',None))
-        except:
-            abort(400, 'Malformed request')
         u = authorize(request)
         u_username = u[1]
-        if not j or not id:
-            abort(400, 'Malformed request')
+        j = get_request_json()
+        id = get_request_arg('id', int, required=True)
         if not db.exists('POST').where(id=id):
-            abort(400, 'Malformed request')
+            abort(404, 'Post Not Found')
         # check the logged in user made this post
         post_author = db.select('POST').where(id=id).execute()[1]
         if u[1] != post_author:
@@ -90,7 +87,7 @@ class Post(Resource):
             abort(403, 'You Are Unauthorized To Edit That Post')
         (desc,src) = unpack(j,'description_text','src',required=False)
         if desc == None and src == None:
-            abort(400, 'Malformed Request')
+            abort(400, "Expected at least 'description_text' or 'src'")
         updated = {}
         if desc:
             updated['description'] = desc
@@ -102,7 +99,8 @@ class Post(Resource):
         }
 
     @posts.response(200, 'Success')
-    @posts.response(400, 'Missing Username/Password')
+    @posts.response(400, 'Malformed Request')
+    @posts.response(404, 'Post Not Found')
     @posts.response(403, 'Invalid Auth Token')
     @posts.expect(auth_details)
     @posts.param('id','the id of the post to delete')
@@ -117,14 +115,9 @@ class Post(Resource):
     ''')
     def delete(self):
         u = authorize(request)
-        try:
-            id = int(request.args.get('id',None))
-        except:
-            abort(400, 'Malformed request')
-        if not id:
-            abort(400,'Malformed Request')
+        id = get_request_arg('id', int, required=True)
         if not db.exists('POST').where(id=id):
-            abort(400,'Malformed Request')
+            abort(404,'Post Not Found')
         p = db.select('POST').where(id=id).execute()
         if p[1] != u[1]:
             abort(403,'You Are Unauthorized To Make That Request')
@@ -135,7 +128,8 @@ class Post(Resource):
             'message': 'success'
         }
     @posts.response(200, 'Success',post_details)
-    @posts.response(400, 'Missing Username/Password')
+    @posts.response(400, 'Malformed Request')
+    @posts.response(404, 'Post Not Found')
     @posts.response(403, 'Invalid Auth Token')
     @posts.expect(auth_details)
     @posts.param('id','the id of the post to fetch')
@@ -156,13 +150,10 @@ class Post(Resource):
     ''')
     def get(self):
         u = authorize(request)
-        try:
-            id = int(request.args.get('id',None))
-        except:
-            abort(400, 'Malformed request')
+        id = get_request_arg('id', int, required=True)
         p = db.select('POST').where(id=id).execute()
         if not p:
-            abort(400,'Malformed Request')
+            abort(404,'Post Not Found')
         return format_post(p)
 
 @posts.route('/like', strict_slashes=False)
@@ -170,6 +161,7 @@ class Like(Resource):
     @posts.response(200, 'Success')
     @posts.response(403, 'Invalid Auth Token')
     @posts.response(400, 'Malformed Request')
+    @posts.response(404, 'Post Not Found')
     @posts.param('id','the id of the post to like')
     @posts.expect(auth_details)
     @posts.doc(description='''
@@ -182,12 +174,9 @@ class Like(Resource):
     ''')
     def put(self):
         u = authorize(request)
-        try:
-            id = int(request.args.get('id',None))
-        except:
-            abort(400, 'Malformed request')
+        id = get_request_arg('id', int, required=True)
         if not db.exists('POST').where(id=id):
-            abort(400, 'Malformed request')
+            abort(404, 'Post Not Found')
         p = db.select('POST').where(id=id).execute()
         likes = text_list_to_set(p[4],process_f=lambda x:int(x))
         likes.add(u[0])
@@ -202,6 +191,7 @@ class Unlike(Resource):
     @posts.response(200, 'Success')
     @posts.response(403, 'Invalid Auth Token')
     @posts.response(400, 'Malformed Request')
+    @posts.response(404, 'Post Not Found')
     @posts.param('id','the id of the post to unlike')
     @posts.expect(auth_details)
     @posts.doc(description='''
@@ -214,12 +204,9 @@ class Unlike(Resource):
     ''')
     def put(self):
         u = authorize(request)
-        try:
-            id = int(request.args.get('id',None))
-        except:
-            abort(400, 'Malformed request')
+        id = get_request_arg('id', int, required=True)
         if not db.exists('POST').where(id=id):
-            abort(400, 'Malformed request')
+            abort(404, 'Post Not Found')
         p = db.select('POST').where(id=id).execute()
         likes = text_list_to_set(p[4],process_f=lambda x: int(x))
         likes.discard(u[0])
@@ -234,6 +221,7 @@ class Comment(Resource):
     @posts.response(200, 'Success')
     @posts.response(403, 'Invalid Auth Token')
     @posts.response(400, 'Malformed Request')
+    @posts.response(404, 'Post Not Found')
     @posts.param('id','the id of the post to comment on')
     @posts.expect(auth_details,comment_details)
     @posts.doc(description='''
@@ -247,18 +235,13 @@ class Comment(Resource):
     ''')
     def put(self):
         u = authorize(request)
-        j = request.json
-        try:
-            id = int(request.args.get('id',None))
-        except:
-            abort(400, 'Malformed request')
-        if not j:
-            abort(400, 'Malformed request')
+        j = get_request_json()
+        id = get_request_arg('id', int, required=True)
         if not db.exists('POST').where(id=id):
-            abort(400, 'Malformed request')
+            abort(404, 'Post Not Found')
         (comment,) = unpack(j,'comment')
         if comment == "":
-            abort(400, 'Malformed request')
+            abort(400, 'Comment cannot be empty')
         comment_id = db.insert('COMMENT').with_values(
             comment=comment,
             author=u[1],

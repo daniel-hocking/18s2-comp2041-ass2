@@ -30,8 +30,5 @@
   "engines": {
     "node": ">=9.0.0",
     "npm": ">=6.0.0"
-  },
-  "dependencies": {
-    "npx": "^10.2.0"
   }
 }
