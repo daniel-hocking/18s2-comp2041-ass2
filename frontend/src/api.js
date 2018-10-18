@@ -1,15 +1,5 @@
 // change this when you integrate with the real API, or when u start using the dev server
-const API_URL = 'http://localhost:5000'
-
-const getJSON = (path, options) => 
-    fetch(path, options)
-        .then(res => res.json())
-        .catch(err => console.warn(`API_ERROR: ${err.message}`));
-        
-const getStatusCode = (path, options) =>
-    fetch(path, options)
-        .then(res => res.status)
-        .catch(err => console.warn(`API_ERROR: ${err.message}`));
+const API_URL = 'http://localhost:5000/'
 
 /**
  * This is a sample class API which you may base your code on.
@@ -23,17 +13,27 @@ export default class API {
      */
     constructor(url = API_URL) {
         this.url = url;
-    } 
+    }
+    
+    makeApiRequest(path, options) {
+      return fetch(this.url + path, options)
+        .catch(err => console.warn(`API_ERROR: ${err.message}`));
+    }
 
-    makeAPIRequest(path, options, status) {
-        if(status) {
-          return getStatusCode(`${this.url}/${path}`, options);
-        }
-        return getJSON(`${this.url}/${path}`, options);
+    makeApiJsonRequest(path, options) {
+      return this.makeApiRequest(path, options)
+        .then(res => res.json())
+        .catch(err => console.warn(`API_ERROR: ${err.message}`));
+    }
+    
+    makeApiStatusRequest(path, options) {
+      return this.makeApiRequest(path, options)
+        .then(res => res.status)
+        .catch(err => console.warn(`API_ERROR: ${err.message}`));
     }
 
     checkLogin(username, password) {
-        return this.makeAPIRequest('auth/login', {
+        return this.makeApiRequest('auth/login', {
           method: "POST",
           body: JSON.stringify({
             "username": username,
@@ -42,21 +42,21 @@ export default class API {
           headers: {
             "Content-Type": "application/json",
           },
-        }, true);
+        });
     }
 
     /**
      * @returns feed array in json format
      */
     getFeed() {
-        return this.makeAPIRequest('dummy/post?id=1');
+        return this.makeApiJsonRequest('dummy/post?id=1');
     }
 
     /**
      * @returns auth'd user in json format
      */
     getMe() {
-        return this.makeAPIRequest('me.json');
+        return this.makeApiJsonRequest('me.json');
     }
 
 }

@@ -20,6 +20,14 @@ export function formatDate(date_in) {
     return `${padNum(date_ob.getHours())}:${padNum(date_ob.getMinutes())} ${padNum(date_ob.getDate())}/${padNum(date_ob.getMonth()+1)}/${date_ob.getFullYear()}`;
 }
 
+export function appendNodeTo(id_name, child_node) {
+  document.getElementById(id_name).appendChild(child_node);
+}
+
+export function removeFrom(id_name, child_id) {
+  document.getElementById(id_name).removeChild(document.getElementById(child_id));
+}
+
 /**
  * You don't have to use this but it may or may not simplify element creation
  * 
@@ -95,6 +103,14 @@ export function uploadImage(event) {
 export function checkStore(key) {
     if (window.localStorage)
         return window.localStorage.getItem(key)
+    else
+        return null
+
+}
+
+export function setStore(key, value) {
+    if (window.localStorage)
+        return window.localStorage.setItem(key, value)
     else
         return null
 
