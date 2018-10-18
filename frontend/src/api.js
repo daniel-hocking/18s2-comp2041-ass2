@@ -1,9 +1,14 @@
 // change this when you integrate with the real API, or when u start using the dev server
-const API_URL = 'http://localhost:8080/data'
+const API_URL = 'http://localhost:5000'
 
 const getJSON = (path, options) => 
     fetch(path, options)
         .then(res => res.json())
+        .catch(err => console.warn(`API_ERROR: ${err.message}`));
+        
+const getStatusCode = (path, options) =>
+    fetch(path, options)
+        .then(res => res.status)
         .catch(err => console.warn(`API_ERROR: ${err.message}`));
 
 /**
@@ -20,19 +25,31 @@ export default class API {
         this.url = url;
     } 
 
-    makeAPIRequest(path) {
-        return getJSON(`${this.url}/${path}`);
+    makeAPIRequest(path, options, status) {
+        if(status) {
+          return getStatusCode(`${this.url}/${path}`, options);
+        }
+        return getJSON(`${this.url}/${path}`, options);
     }
 
-    getUser() {
-        return this.makeAPIRequest('users.json');
+    checkLogin(username, password) {
+        return this.makeAPIRequest('auth/login', {
+          method: "POST",
+          body: JSON.stringify({
+            "username": username,
+            "password": password
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }, true);
     }
 
     /**
      * @returns feed array in json format
      */
     getFeed() {
-        return this.makeAPIRequest('feed.json');
+        return this.makeAPIRequest('dummy/post?id=1');
     }
 
     /**

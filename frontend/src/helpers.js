@@ -16,7 +16,7 @@ export function padNum(num, pad_by = 2, pad_with = '0') {
 }
 
 export function formatDate(date_in) {
-    const date_ob = new Date(date_in)
+    const date_ob = new Date(date_in);
     return `${padNum(date_ob.getHours())}:${padNum(date_ob.getMinutes())} ${padNum(date_ob.getDate())}/${padNum(date_ob.getMonth()+1)}/${date_ob.getFullYear()}`;
 }
 
@@ -48,15 +48,15 @@ export function createPostTile(post) {
     const section = createElement('section', null, { class: 'post' });
 
     const post_title = section.appendChild(createElement('h2', post.meta.author, { class: 'post-title' }));
-    post_title.appendChild(createElement('span', formatDate(post.meta.published), { class: 'post-date'}));
+    post_title.appendChild(createElement('span', formatDate(parseInt(post.meta.published)), { class: 'post-date'}));
 
     section.appendChild(createElement('img', null, 
-        { src: '/images/'+post.src, alt: post.meta.description_text, class: 'post-image' }));
+        { src: 'data:image/png;base64,'+post.src, alt: post.meta.description_text, class: 'post-image' }));
 
     const post_footer = section.appendChild(createElement('div', null, { class: 'post-footer'}));
     
     post_footer.appendChild(createElement('span', post.meta.description_text, { class: 'post-desc' }));
-    post_footer.appendChild(createElement('span', `Likes: ${post.meta.likes.length} / Comments: ${post.meta.comments.length}`, { class: 'post-like-comments' }));
+    post_footer.appendChild(createElement('span', `Likes: ${post.meta.likes.length} / Comments: ${post.comments.length}`, { class: 'post-like-comments' }));
 
     return section;
 }
