@@ -8,7 +8,7 @@ def unpack(j,*args,**kargs):
         if not_found:
             expected = ", ".join(map(str, not_found))
             abort(kargs.get("error",400), "Expected request object to contain: " + expected)
-    return [j[arg] for arg in args]
+    return [j.get(arg, None) for arg in args]
 
 def gen_token():
     token = secrets.token_hex(32)
