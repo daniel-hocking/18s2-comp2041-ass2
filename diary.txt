@@ -2,3 +2,4 @@
 14/10/18  14:00 16:30   Coding  Work on subset0 tasks, basic display of feed and login using local files, some troubleshooting as well due to a browser issue
 18/10/18  11:00 11:45   Coding  Start moving API across to subset1 with requests to backend
 18/10/18  14:15 16:15   Coding  Refactor to improve code structure, work on login function and storing token
+20/10/18  14:30 16:15   Coding  Improve login, add register form, improve feed, subset1 more or less working

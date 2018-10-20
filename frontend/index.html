@@ -6,6 +6,7 @@
     <title>Instacram</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- You can add your styles and scripts here -->
+    <link rel="stylesheet" href="https://bootswatch.com/4/litera/bootstrap.min.css" type="text/css">
     <link rel="stylesheet" type="text/css" media="screen" href="styles/provided.css" />
     <script type="module" src="src/helpers.js"></script>
     <script type="module" src="src/api.js"></script>
@@ -15,10 +16,9 @@
     <!-- This is an example app structure --> 
     <header class='banner'>
         <h1>Instacram</h1>
-        <ul class='nav req-auth'>
-            <li class="nav-item"><input type="file"/></li>
-            <li class='nav-item'>Icon</li>
-            <li class='nav-item'>Icon</li>
+        <ul class='nav'>
+            <li class="nav-item req-auth"><input type="file"/></li>
+            <li id="logout-btn" class="nav-item req-auth btn">Logout</li>
         </ul>
     </header>
     <main id='main-section' role='main'>

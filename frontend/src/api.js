@@ -44,12 +44,32 @@ export default class API {
           },
         });
     }
+    
+    reigtserUser(register_username, register_password, register_email, register_name) {
+        return this.makeApiRequest('auth/signup', {
+          method: "POST",
+          body: JSON.stringify({
+            "username": register_username,
+            "password": register_password,
+            "email": register_email,
+            "name": register_name,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+    }
+
 
     /**
      * @returns feed array in json format
      */
-    getFeed() {
-        return this.makeApiJsonRequest('dummy/post?id=1');
+    getFeed(token) {
+        return this.makeApiJsonRequest('user/feed', {
+          headers: {
+            "Authorization": "Token " + token,
+          },
+        });
     }
 
     /**

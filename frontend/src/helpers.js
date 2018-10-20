@@ -25,7 +25,10 @@ export function appendNodeTo(id_name, child_node) {
 }
 
 export function removeFrom(id_name, child_id) {
-  document.getElementById(id_name).removeChild(document.getElementById(child_id));
+  const parent_node = document.getElementById(id_name);
+  const child_node = document.getElementById(child_id);
+  if(parent_node && child_node)
+    parent_node.removeChild(child_node);
 }
 
 /**
@@ -106,6 +109,15 @@ export function checkStore(key) {
     else
         return null
 
+}
+
+export function clearStore(key) {
+  if(window.localStorage) {
+    window.localStorage.removeItem(key);
+    return true;
+  } else {
+    return false;
+  }
 }
 
 export function setStore(key, value) {

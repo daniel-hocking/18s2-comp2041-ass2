@@ -103,6 +103,28 @@ footer {
     }
 }
 
+/* To override some of the styles of bootstrap */
+button.btn {
+   font-size: 1.5em;
+   border-radius: 0.5em;
+}
+
+#output {
+  border: 2px #EBEBEB solid;
+  border-radius: 25px;
+  min-height: 100px;
+  padding: 2rem;
+}
+
+nav ul.navbar-nav {
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+li.nav-item {
+  margin: auto 10px;
+}
+
 /* Add your styles here */
 .not-auth .req-auth {
     display: none;
@@ -112,17 +134,20 @@ footer {
     display: none;
 }
 
-.login-form {
+.login-form, .register-form {
     margin: 20px auto;
     max-width: 150px;
     text-align: center;
 }
 
-.login-form input {
+.login-form input, 
+.register-form input {
     max-width: 150px;
 }
 
 .login-form input,
-.login-form div {
+.login-form div,
+.register-form input,
+.register-form div  {
     margin: 0 0 10px 0;
 }
