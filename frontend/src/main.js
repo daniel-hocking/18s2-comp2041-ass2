@@ -5,10 +5,9 @@ import User from './user.js';
 (function() {
     const user = new User();
     
-    let token = user.checkToken();
-    if(!token) {
+    if(!user.token) {
       user.createLoginForm();
     } else {
-      user.displayFeed();
+      user.post.displayFeed();
     }
 }());

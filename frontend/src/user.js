@@ -1,15 +1,21 @@
 import * as helpers from './helpers.js';
 import API from './api.js';
+import Post from './post.js';
 
 export default class User {
   
   constructor() {
     this.api = new API();
+    this.token = this.checkToken();
+    if(this.token) {
+      this.post = new Post(this);
+    } else {
+      this.post = null
+    }
   }
   
   checkToken() {
-    this.token = helpers.checkStore('token');
-    return this.token;
+    return helpers.checkStore('token');
   }
   
   setToken(token) {
@@ -20,6 +26,15 @@ export default class User {
   logoutCurrentUser() {
     helpers.clearStore('token');
     location.reload();
+  }
+  
+  loginUser(token, form_id) {
+    console.log(token);
+    this.setToken(token.token);
+    helpers.removeFrom('main-section', form_id);
+    
+    this.post = new Post(this);
+    this.post.displayFeed();
   }
     
   createLoginForm() {
@@ -70,11 +85,7 @@ export default class User {
             
           login.json()
             .then(login_token => {
-              console.log(login_token);
-              this.setToken(login_token.token);
-              helpers.removeFrom('main-section', 'login-form');
-
-              this.displayFeed();
+              this.loginUser(login_token, 'login-form');
           });
       })
     });
@@ -94,40 +105,9 @@ export default class User {
             
           register.json()
             .then(register_token => {
-              console.log(register_token);
-              this.setToken(register_token.token);
-              helpers.removeFrom('main-section', 'register-form');
-
-              this.displayFeed();
+              this.loginUser(register_token, 'register-form');
           });
       })
-    });
-  }
-  
-  displayFeed() {
-    const html_tag = document.getElementById('html-tag');
-    html_tag.classList.add('auth');
-    html_tag.classList.remove('not-auth');
-    
-    document.querySelector('input[type="file"]').addEventListener('change', helpers.uploadImage);
-    document.getElementById('logout-btn').addEventListener('click', this.logoutCurrentUser);
-    
-    const feed = this.api.getFeed(this.token);
-
-    feed
-    .then(posts => {
-        console.log(posts);
-        if(posts) {
-          posts['posts'].reduce((parent, post) => {
-
-              parent.appendChild(helpers.createPostTile(post));
-              
-              return parent;
-
-          }, document.getElementById('large-feed'))
-        } else {
-          document.getElementById('large-feed').appendChild(helpers.createPostTile(posts));
-        }
     });
   }
 

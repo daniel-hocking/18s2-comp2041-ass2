@@ -151,3 +151,16 @@ li.nav-item {
 .register-form div  {
     margin: 0 0 10px 0;
 }
+
+.badge {
+  padding: 3px 7px;
+  background-color: #777777;
+  border-radius: 10px;
+  margin: 5px;
+  color: white;
+  font-weight: bold;
+}
+
+.clickable {
+  cursor: pointer;
+}

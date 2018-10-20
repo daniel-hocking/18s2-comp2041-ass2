@@ -67,7 +67,11 @@ export function createPostTile(post) {
     const post_footer = section.appendChild(createElement('div', null, { class: 'post-footer'}));
     
     post_footer.appendChild(createElement('span', post.meta.description_text, { class: 'post-desc' }));
-    post_footer.appendChild(createElement('span', `Likes: ${post.meta.likes.length} / Comments: ${post.comments.length}`, { class: 'post-like-comments' }));
+    
+    const like_comment = createElement('span', null, { class: 'post-like-comments' });
+    like_comment.appendChild(createElement('span', `Likes: ${post.meta.likes.length}`, { class: 'badge clickable' }));
+    like_comment.appendChild(createElement('span', `Comments: ${post.comments.length}`, { class: 'badge clickable' }));
+    post_footer.appendChild(like_comment);
 
     return section;
 }
