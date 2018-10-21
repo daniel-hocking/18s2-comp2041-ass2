@@ -28,9 +28,10 @@ export default class User {
     location.reload();
   }
   
-  loginUser(token, form_id) {
+  loginUser(token, username, form_id) {
     console.log(token);
     this.setToken(token.token);
+    helpers.setStore('username', username);
     helpers.removeFrom('main-section', form_id);
     
     this.post = new Post(this);
@@ -85,7 +86,7 @@ export default class User {
             
           login.json()
             .then(login_token => {
-              this.loginUser(login_token, 'login-form');
+              this.loginUser(login_token, username, 'login-form');
           });
       })
     });
@@ -105,7 +106,7 @@ export default class User {
             
           register.json()
             .then(register_token => {
-              this.loginUser(register_token, 'register-form');
+              this.loginUser(register_token, register_username, 'register-form');
           });
       })
     });

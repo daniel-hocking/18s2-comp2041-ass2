@@ -5,3 +5,4 @@
 20/10/18  14:30 16:15   Coding  Improve login, add register form, improve feed, subset1 more or less working
 20/10/18  21:00 21:45   Coding  Some refactoring to cleanup the code, improve the appearance and start to implement subset2 features
 21/10/18  15:00 17:00   Coding  More work on subset2 features, show likes and comments, like posts, better bootstrap integration for modals
+22/10/18  8:50  10:50   Coding  Improve the like/comment functionality, allow unlike and adding comments

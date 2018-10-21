@@ -164,3 +164,21 @@ li.nav-item {
 .clickable {
   cursor: pointer;
 }
+
+.comment-div {
+  border: dotted 1px;
+  padding: 5px;
+  margin-bottom: 5px;
+}
+
+#new-comment-div {
+  width: 100%;
+}
+
+#new-comment-div input {
+  line-height: 42px;
+}
+
+#new-comment-div button {
+  float: right;
+}

@@ -101,5 +101,28 @@ export default class API {
         },
       });
     }
+    
+    unlikePost(token, post_id) {
+      return this.makeApiJsonRequest('post/unlike?id=' + post_id, {
+        method: "PUT",
+        headers: {
+          "Authorization": "Token " + token,
+        },
+      });
+    }
+    
+    postComment(token, post_id, comment) {
+        return this.makeApiJsonRequest('post/comment?id=' + post_id, {
+          method: "PUT",
+          headers: {
+            "Authorization": "Token " + token,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            "published": (new Date).getTime(),
+            "comment": comment,
+          }),
+        });
+    }
 
 }
