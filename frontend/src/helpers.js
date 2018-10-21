@@ -38,9 +38,11 @@ export function removeFrom(id_name, child_id) {
  * @param {any}     data    Any textContent, data associated with the element
  * @param {object}  options Any further HTML attributes specified
  */
-export function createElement(tag, data, options = {}) {
+export function createElement(tag, data, options = {}, child = null) {
     const el = document.createElement(tag);
     el.textContent = data;
+    if(child)
+      el.appendChild(child);
    
     // Sets the attributes in the options object to the element
     return Object.entries(options).reduce(
@@ -50,30 +52,32 @@ export function createElement(tag, data, options = {}) {
         }, el);
 }
 
-/**
- * Given a post, return a tile with the relevant data
- * @param   {object}        post 
- * @returns {HTMLElement}
- */
-export function createPostTile(post) {
-    const section = createElement('section', null, { class: 'post' });
+export function createModal(title, body, footer = null) {
+  const modal_outer = createElement('div', null, { class: 'modal fade', id: 'modal-popup',  role: 'dialog', 'aria-labelledby': 'modal-title', 'aria-hidden': 'true' });
+  const modal_inner = createElement('div', null, { class: 'modal-dialog modal-dialog-centered', role: 'document' });
+  const modal_content = createElement('div', null, { class: 'modal-content' });
+  const modal_header = createElement('div', null, { class: 'modal-header' });
+  const modal_heading = createElement('h5', title, { class: 'modal-title', id: 'modal-title' });
+  const modal_button = createElement('button', null, { class: 'close', type: 'button', 'data-dismiss': 'modal', 'aria-label': 'Close' }, createElement('span', '×', { 'aria-hidden': 'true' }));
+  
+  const modal_body = createElement('div', null, { class: 'modal-header' }, body);
+  
+  modal_header.appendChild(modal_heading);
+  modal_header.appendChild(modal_button);
+  modal_content.appendChild(modal_header);
+  modal_content.appendChild(modal_body);
+  if(footer) {
+    modal_content.appendChild(createElement('div', null, { class: 'modal-footer' }, footer));
+  }
+  
+  modal_inner.appendChild(modal_content);
+  modal_outer.appendChild(modal_inner);
 
-    const post_title = section.appendChild(createElement('h2', post.meta.author, { class: 'post-title' }));
-    post_title.appendChild(createElement('span', formatDate(parseInt(post.meta.published)), { class: 'post-date'}));
-
-    section.appendChild(createElement('img', null, 
-        { src: 'data:image/png;base64,'+post.src, alt: post.meta.description_text, class: 'post-image' }));
-
-    const post_footer = section.appendChild(createElement('div', null, { class: 'post-footer'}));
-    
-    post_footer.appendChild(createElement('span', post.meta.description_text, { class: 'post-desc' }));
-    
-    const like_comment = createElement('span', null, { class: 'post-like-comments' });
-    like_comment.appendChild(createElement('span', `Likes: ${post.meta.likes.length}`, { class: 'badge clickable' }));
-    like_comment.appendChild(createElement('span', `Comments: ${post.comments.length}`, { class: 'badge clickable' }));
-    post_footer.appendChild(like_comment);
-
-    return section;
+  document.getElementById('main-section').appendChild(modal_outer);
+  $('#modal-popup').modal();
+  $('#modal-popup').on('hidden.bs.modal', function (e) {
+    removeFrom('main-section', 'modal-popup');
+  });
 }
 
 // Given an input element of type=file, grab the data uploaded for use

@@ -60,7 +60,6 @@ export default class API {
         });
     }
 
-
     /**
      * @returns feed array in json format
      */
@@ -72,11 +71,35 @@ export default class API {
         });
     }
 
-    /**
-     * @returns auth'd user in json format
-     */
-    getMe() {
-        return this.makeApiJsonRequest('me.json');
+    getPost(token, post_id) {
+        return this.makeApiJsonRequest('post?id=' + post_id, {
+          headers: {
+            "Authorization": "Token " + token,
+          },
+        });
+    }
+    
+    getUser(token, user_id = null, user_name = null) {
+      let query_string;
+      if(user_id) {
+        query_string = '?id=' + user_id;
+      } else {
+        query_string = '?username=' + user_name;
+      }
+      return this.makeApiJsonRequest('user' + query_string, {
+        headers: {
+          "Authorization": "Token " + token,
+        },
+      });
+    }
+    
+    likePost(token, post_id) {
+      return this.makeApiJsonRequest('post/like?id=' + post_id, {
+        method: "PUT",
+        headers: {
+          "Authorization": "Token " + token,
+        },
+      });
     }
 
 }
