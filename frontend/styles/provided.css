@@ -81,7 +81,6 @@ footer {
 
 .post-image {
     width: 640px;
-    height: 640px;
 }
 
 @media screen and (max-width: 500px) {
@@ -165,6 +164,10 @@ li.nav-item {
   cursor: pointer;
 }
 
+.modal .clickable {
+  cursor: initial;
+}
+
 .comment-div {
   border: dotted 1px;
   padding: 5px;
@@ -181,4 +184,37 @@ li.nav-item {
 
 #new-comment-div button {
   float: right;
+}
+
+.profile-div {
+  width: 100%;
+}
+
+.profile-div fieldset {
+  width: 100%;
+  border: solid 1px;
+}
+
+.profile-div legend {
+  width: initial;
+  padding: 0px 5px;
+  margin-bottom: 0;
+}
+
+.spaced-item {
+  padding: 0px 0px 5px 10px;
+}
+
+#update-profile-button {
+  float: right;
+  margin: 5px;
+}
+
+.modal .post-image {
+  max-width: 100%;
+}
+
+.modal .post-title {
+  padding: 10px 15px;
+  font-size: 1.5rem;
 }

@@ -59,12 +59,31 @@ export default class API {
           },
         });
     }
+    
+    updateUser(token, name, email, password) {
+      let body_object = {
+        "name": name,
+        "email": email
+      };
+      if(password) {
+        body_object["password"] = password;
+      }
+      return this.makeApiRequest('user', {
+        method: "PUT",
+        body: JSON.stringify(body_object),
+        headers: {
+          "Authorization": "Token " + token,
+          "Content-Type": "application/json",
+        },
+      });
+    }
 
     /**
      * @returns feed array in json format
      */
-    getFeed(token) {
-        return this.makeApiJsonRequest('user/feed', {
+    getFeed(token, p = 0, n = 4) {
+      const query_string = '?p=' + p + '&n=' + n;
+        return this.makeApiJsonRequest('user/feed' + query_string, {
           headers: {
             "Authorization": "Token " + token,
           },
@@ -80,10 +99,10 @@ export default class API {
     }
     
     getUser(token, user_id = null, user_name = null) {
-      let query_string;
+      let query_string = '';
       if(user_id) {
         query_string = '?id=' + user_id;
-      } else {
+      } else if(user_name) {
         query_string = '?username=' + user_name;
       }
       return this.makeApiJsonRequest('user' + query_string, {
@@ -128,6 +147,20 @@ export default class API {
     createPost(token, desc, img) {
         return this.makeApiJsonRequest('post', {
           method: "POST",
+          headers: {
+            "Authorization": "Token " + token,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            "description_text": desc,
+            "src": img,
+          }),
+        });
+    }
+    
+    updatePost(token, desc, img, post_id) {
+        return this.makeApiJsonRequest('post?id=' + post_id, {
+          method: "PUT",
           headers: {
             "Authorization": "Token " + token,
             "Content-Type": "application/json",

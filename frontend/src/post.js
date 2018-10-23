@@ -8,8 +8,19 @@ export default class Post {
     this.token = user.token;
     this.user = user;
     this.current_image = null;
+    this.can_update_feed = false;
+    this.next_scroll_point = 0;
+    this.posts_p = 0;
     
-    document.getElementById('create-post-btn').addEventListener('click', this.createPostForm.bind(this));
+    document.getElementById('create-post-btn').addEventListener('click', this.createPostForm.bind(this, null));
+    window.addEventListener('scroll', this.updateFeedOnScroll.bind(this));
+  }
+  
+  updateFeedOnScroll() {
+    if(this.can_update_feed && (window.pageYOffset + window.innerHeight) > this.next_scroll_point) {
+      this.can_update_feed = false;
+      this.loadFeed(2);
+    }
   }
   
   displayFeed() {
@@ -19,23 +30,25 @@ export default class Post {
 
     document.getElementById('logout-btn').addEventListener('click', this.user.logoutCurrentUser);
     
-    const feed = this.api.getFeed(this.token);
-
-    feed
-    .then(posts => {
+    this.loadFeed();
+  }
+  
+  loadFeed(num_posts = 4, feed_id = 'large-feed') {
+    this.api.getFeed(this.token, this.posts_p, num_posts)
+      .then(posts => {
         console.log(posts);
-        if(posts) {
+        if(posts && posts['posts'].length) {
           posts['posts'].reduce((parent, post) => {
-
-              parent.appendChild(this.createPostTile(post));
-              
-              return parent;
-
-          }, document.getElementById('large-feed'))
-        } else {
-          document.getElementById('large-feed').appendChild(this.createPostTile(posts));
+            parent.appendChild(this.createPostTile(post));
+            return parent;
+          }, document.getElementById(feed_id));
+          
+          this.next_scroll_point = document.body.scrollHeight - window.innerHeight - 250;
+          this.posts_p += num_posts;
+          this.can_update_feed = true;
+          console.log(this.posts_p, this.next_scroll_point);
         }
-    });
+      });
   }
   
   /**
@@ -43,14 +56,18 @@ export default class Post {
    * @param   {object}        post 
    * @returns {HTMLElement}
    */
-  createPostTile(post) {
+  createPostTile(post, full_post = true, editable = false) {
       const section = helpers.createElement('section', null, { class: 'post' });
 
-      const post_title = section.appendChild(helpers.createElement('h2', post.meta.author, { class: 'post-title' }));
+      const post_title = section.appendChild(helpers.createElement('h2', post.meta.author, { class: 'post-title clickable' }));
+      if(full_post)
+        post_title.addEventListener('click', this.loadUserPage.bind(this, post.meta.author));
       post_title.appendChild(helpers.createElement('span', helpers.formatDate(parseInt(post.meta.published) * 1000), { class: 'post-date'}));
 
-      section.appendChild(helpers.createElement('img', null, 
-          { src: 'data:image/png;base64,'+post.src, alt: post.meta.description_text, class: 'post-image' }));
+      const img_element = section.appendChild(helpers.createElement('img', null, 
+          { src: 'data:image/png;base64,'+post.src, alt: post.meta.description_text, class: 'post-image clickable' }));
+      if(full_post)
+        img_element.addEventListener('click', this.loadUserPage.bind(this, post.meta.author));
 
       const post_footer = section.appendChild(helpers.createElement('div', null, { class: 'post-footer'}));
       
@@ -58,14 +75,26 @@ export default class Post {
       
       const like_comment = helpers.createElement('span', null, { class: 'post-like-comments' });
       const like_badge = helpers.createElement('span', `Likes: ${post.meta.likes.length}`, { id: 'likes-badge-' + post.id, class: 'badge clickable' });
-      like_badge.addEventListener('click', this.viewPostLikes.bind(this, post.id));
+      if(full_post)
+        like_badge.addEventListener('click', this.viewPostLikes.bind(this, post.id));
       like_comment.appendChild(like_badge);
       const comment_badge = helpers.createElement('span', `Comments: ${post.comments.length}`, { id: 'comments-badge-' + post.id, class: 'badge clickable' });
-      comment_badge.addEventListener('click', this.viewPostComments.bind(this, post.id));
+      if(full_post)
+        comment_badge.addEventListener('click', this.viewPostComments.bind(this, post.id));
       like_comment.appendChild(comment_badge);
       post_footer.appendChild(like_comment);
+      
+      if(editable) {
+        const edit_post_button = section.appendChild(helpers.createElement('button', 'Edit post', { type: 'button', class: 'btn', 'data-dismiss': 'modal' }));
+        console.log(edit_post_button);
+        edit_post_button.addEventListener('click', this.createPostFormSoon.bind(this, post));
+      }
 
       return section;
+  }
+  
+  loadUserPage(author) {
+    this.user.createProfilePage(author);
   }
   
   viewPostLikes(post_id) {
@@ -155,11 +184,15 @@ export default class Post {
       });
   }
   
-  createPostForm() {
-    this.current_image = null
+  createPostFormSoon(post) {
+    $('#modal-popup').on('hidden.bs.modal', this.createPostForm.bind(this, post));
+  }
+  
+  createPostForm(post) {
+    this.current_image = post ? post.src : null
     const create_post_div = helpers.createElement('div', null, { id: 'create-post-div' });
     const create_post_messages = helpers.createElement('div', null, { id: 'create-post-messages' });
-    const description_input = helpers.createElement('input', null, { id: 'description-input', type: 'text', placeholder: 'Post description' });
+    const description_input = helpers.createElement('input', null, { id: 'description-input', type: 'text', placeholder: 'Post description', value: post ? post.meta.description_text : '' });
     const upload_image_input = helpers.createElement('input', null, { id: 'upload-image-input', type: 'file' });
     upload_image_input.addEventListener('change', this.imageUploaded.bind(this));
     create_post_div.appendChild(create_post_messages);
@@ -167,9 +200,11 @@ export default class Post {
     create_post_div.appendChild(helpers.createElement('br'));
     create_post_div.appendChild(helpers.createElement('br'));
     create_post_div.appendChild(upload_image_input);
-    const new_post_button = helpers.createElement('button', 'Create post', { id: 'new-post-button', type: 'button', class: 'btn' });
-    new_post_button.addEventListener('click', this.createPostSubmit.bind(this));
-    helpers.createModal('Create post', create_post_div, new_post_button);
+    const post_text = post ? 'Update post' : 'Create post';
+    const new_post_button = helpers.createElement('button', post_text, { id: 'new-post-button', type: 'button', class: 'btn' });
+    const post_id = post ? post.id : null;
+    new_post_button.addEventListener('click', this.createPostSubmit.bind(this, post_id));
+    helpers.createModal(post_text, create_post_div, new_post_button);
   }
   
   imageUploaded(event) {
@@ -195,14 +230,18 @@ export default class Post {
     reader.readAsDataURL(file);
   }
   
-  createPostSubmit() {
+  createPostSubmit(post_id) {
     const post_desc = document.getElementById('description-input').value;
     if(!post_desc || !this.current_image) {
       helpers.createAlert('You must enter both a description and select an image before you can create a post.', 'create-post-messages');
       return false;
     }
     
-    this.api.createPost(this.token, post_desc, this.current_image);
+    if(post_id) {
+      this.api.updatePost(this.token, post_desc, this.current_image, post_id);
+    } else {
+      this.api.createPost(this.token, post_desc, this.current_image);
+    }
     $('#modal-popup').modal('hide');
   }
 }

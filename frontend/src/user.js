@@ -12,6 +12,7 @@ export default class User {
     } else {
       this.post = null
     }
+    document.getElementById('view-profile-btn').addEventListener('click', this.createProfilePage.bind(this, null));
   }
   
   checkToken() {
@@ -72,6 +73,82 @@ export default class User {
     helpers.appendNodeTo('main-section', register_form);
     
     this.onSubmitRegisterForm();
+  }
+  
+  createProfilePage(profile_username) {
+    console.log(profile_username);
+    const my_profile = profile_username === null ? true : false;
+    const profile_div = helpers.createElement('div', null, { id: 'profile-div', class: 'profile-div' });
+    const basics_fieldset = helpers.createElement('fieldset', null, { id: 'basics-profile-fieldset' });
+    basics_fieldset.appendChild(helpers.createElement('legend', 'Basic details'));
+    const following_fieldset = helpers.createElement('fieldset', null, { id: 'following-profile-fieldset' });
+    following_fieldset.appendChild(helpers.createElement('legend', 'Following'));
+    const posts_fieldset = helpers.createElement('fieldset', null, { id: 'posts-profile-fieldset' });
+    posts_fieldset.appendChild(helpers.createElement('legend', 'Posts'));
+    
+    profile_div.appendChild(basics_fieldset);
+    profile_div.appendChild(following_fieldset);
+    profile_div.appendChild(posts_fieldset);
+    
+    this.api.getUser(this.token, null, profile_username)
+      .then(user => {
+        if(my_profile) {
+          basics_fieldset.appendChild(helpers.createElement('div', 'Username: ' + user.username, { class: 'spaced-item' }));
+          const name_input = helpers.createElement('input', null, { id: 'name-profile-input', type: 'text', placeholder: 'name', value: user.name });
+          basics_fieldset.appendChild(helpers.createElement('div', 'Name: ', { class: 'spaced-item' }, name_input));
+          const email_input = helpers.createElement('input', null, { id: 'email-profile-input', type: 'text', placeholder: 'email', value: user.email });
+          basics_fieldset.appendChild(helpers.createElement('div', 'Email: ', { class: 'spaced-item' }, email_input));
+          const password_input = helpers.createElement('input', null, { id: 'password-profile-input', type: 'password', placeholder: 'password' });
+          basics_fieldset.appendChild(helpers.createElement('div', 'Password: ', { class: 'spaced-item' }, password_input));
+          
+          const update_profile_button = helpers.createElement('button', 'Update profile', { id: 'update-profile-button', type: 'button', class: 'btn', 'data-dismiss': 'modal' });
+          update_profile_button.addEventListener('click', this.updateProfile.bind(this));
+          basics_fieldset.appendChild(update_profile_button);
+        } else {
+          basics_fieldset.appendChild(helpers.createElement('div', 'Username: ' + user.username, { class: 'spaced-item' }));
+          basics_fieldset.appendChild(helpers.createElement('div', 'Name: ' + user.name, { class: 'spaced-item' }));
+          basics_fieldset.appendChild(helpers.createElement('div', 'Email: ' + user.email, { class: 'spaced-item' }));
+        }
+        
+        if(user.following.length === 0) {
+          following_fieldset.appendChild(helpers.createElement('div', 'Nobody yet', { class: 'spaced-item' }));
+        } else {
+          for(const user_id of user.following) {
+            this.api.getUser(this.token, user_id)
+              .then(followed_user => {
+                following_fieldset.appendChild(helpers.createElement('span', followed_user.username, { class: 'badge' }));
+              });
+          }
+        }
+        
+        if(user.posts.length === 0) {
+          posts_fieldset.appendChild(helpers.createElement('div', 'None yet', { class: 'spaced-item' }));
+        } else {
+          let total_likes = 0;
+          posts_fieldset.appendChild(helpers.createElement('span', 'Total posts: ' + user.posts.length, { class: 'badge' }));
+          const likes_badge = helpers.createElement('span', 'Total likes: ' + total_likes, { class: 'badge' });
+          posts_fieldset.appendChild(likes_badge);
+          const profile_posts_div = posts_fieldset.appendChild(helpers.createElement('div', null, { class: 'profile-posts-div' }));
+          for(const post_id of user.posts) {
+            this.api.getPost(this.token, post_id)
+              .then(post => {
+                total_likes += post.meta.likes.length;
+                likes_badge.innerText = 'Total likes: ' + total_likes;
+                profile_posts_div.appendChild(this.post.createPostTile(post, false, my_profile));
+              });
+          }
+        }
+      });
+      
+    helpers.createModal(my_profile ? 'My profile' : profile_username + '\'s profile', profile_div);
+  }
+  
+  updateProfile() {
+    const name_val = document.getElementById('name-profile-input').value;
+    const email_val = document.getElementById('email-profile-input').value;
+    const password_val = document.getElementById('password-profile-input').value;
+    
+    this.api.updateUser(this.token, name_val, email_val, password_val);
   }
   
   onSubmitLoginForm() {

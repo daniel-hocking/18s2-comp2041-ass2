@@ -70,7 +70,7 @@ export function createModal(title, body, footer = null) {
   const modal_heading = createElement('h5', title, { class: 'modal-title', id: 'modal-title' });
   const modal_button = createElement('button', null, { class: 'close', type: 'button', 'data-dismiss': 'modal', 'aria-label': 'Close' }, createElement('span', '×', { 'aria-hidden': 'true' }));
   
-  const modal_body = createElement('div', null, { class: 'modal-header' }, body);
+  const modal_body = createElement('div', null, { class: 'modal-body' }, body);
   
   modal_header.appendChild(modal_heading);
   modal_header.appendChild(modal_button);
