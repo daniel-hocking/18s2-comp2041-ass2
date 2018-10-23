@@ -124,5 +124,19 @@ export default class API {
           }),
         });
     }
+    
+    createPost(token, desc, img) {
+        return this.makeApiJsonRequest('post', {
+          method: "POST",
+          headers: {
+            "Authorization": "Token " + token,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            "description_text": desc,
+            "src": img,
+          }),
+        });
+    }
 
 }

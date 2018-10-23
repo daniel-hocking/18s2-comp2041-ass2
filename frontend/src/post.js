@@ -7,14 +7,16 @@ export default class Post {
     this.api = new API();
     this.token = user.token;
     this.user = user;
+    this.current_image = null;
+    
+    document.getElementById('create-post-btn').addEventListener('click', this.createPostForm.bind(this));
   }
   
   displayFeed() {
     const html_tag = document.getElementById('html-tag');
     html_tag.classList.add('auth');
     html_tag.classList.remove('not-auth');
-    
-    document.querySelector('input[type="file"]').addEventListener('change', helpers.uploadImage);
+
     document.getElementById('logout-btn').addEventListener('click', this.user.logoutCurrentUser);
     
     const feed = this.api.getFeed(this.token);
@@ -151,5 +153,56 @@ export default class Post {
         if(response.message === 'success')
           document.getElementById('comments-badge-' + post_id).innerText = `Comments: ${num_comments + 1}`;
       });
+  }
+  
+  createPostForm() {
+    this.current_image = null
+    const create_post_div = helpers.createElement('div', null, { id: 'create-post-div' });
+    const create_post_messages = helpers.createElement('div', null, { id: 'create-post-messages' });
+    const description_input = helpers.createElement('input', null, { id: 'description-input', type: 'text', placeholder: 'Post description' });
+    const upload_image_input = helpers.createElement('input', null, { id: 'upload-image-input', type: 'file' });
+    upload_image_input.addEventListener('change', this.imageUploaded.bind(this));
+    create_post_div.appendChild(create_post_messages);
+    create_post_div.appendChild(description_input);
+    create_post_div.appendChild(helpers.createElement('br'));
+    create_post_div.appendChild(helpers.createElement('br'));
+    create_post_div.appendChild(upload_image_input);
+    const new_post_button = helpers.createElement('button', 'Create post', { id: 'new-post-button', type: 'button', class: 'btn' });
+    new_post_button.addEventListener('click', this.createPostSubmit.bind(this));
+    helpers.createModal('Create post', create_post_div, new_post_button);
+  }
+  
+  imageUploaded(event) {
+    const [ file ] = event.target.files;
+
+    const validFileTypes = [ 'image/png' ]
+    const valid = validFileTypes.find(type => type === file.type);
+
+    // bad data, let's walk away
+    if (!valid)
+      return false;
+    
+    // if we get here we have a valid image
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      // do something with the data result
+      let data_url = e.target.result;
+      this.current_image = data_url.replace(/data:image\/png;base64,/, '');
+    };
+
+    // this returns a base64 image
+    reader.readAsDataURL(file);
+  }
+  
+  createPostSubmit() {
+    const post_desc = document.getElementById('description-input').value;
+    if(!post_desc || !this.current_image) {
+      helpers.createAlert('You must enter both a description and select an image before you can create a post.', 'create-post-messages');
+      return false;
+    }
+    
+    this.api.createPost(this.token, post_desc, this.current_image);
+    $('#modal-popup').modal('hide');
   }
 }

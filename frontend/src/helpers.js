@@ -31,6 +31,16 @@ export function removeFrom(id_name, child_id) {
     parent_node.removeChild(child_node);
 }
 
+export function createAlert(message, parent_id, type = 'danger') {
+  const parent_node = document.getElementById(parent_id);
+  const new_node = createElement('div', message, { class: "alert alert-dismissible fade show alert-" + type, role: 'alert' });
+  const dismiss_button = createElement('button', null, { class: 'close', type: 'button', 'data-dismiss': 'alert', 'aria-label': 'Close' });
+  const dismiss_cross = createElement('span', '×', { 'aria-hidden': 'true' });
+  dismiss_button.appendChild(dismiss_cross);
+  new_node.appendChild(dismiss_button);
+  parent_node.appendChild(new_node);
+}
+
 /**
  * You don't have to use this but it may or may not simplify element creation
  * 
@@ -78,31 +88,6 @@ export function createModal(title, body, footer = null) {
   $('#modal-popup').on('hidden.bs.modal', function (e) {
     removeFrom('main-section', 'modal-popup');
   });
-}
-
-// Given an input element of type=file, grab the data uploaded for use
-export function uploadImage(event) {
-    const [ file ] = event.target.files;
-
-    const validFileTypes = [ 'image/jpeg', 'image/png', 'image/jpg' ]
-    const valid = validFileTypes.find(type => type === file.type);
-
-    // bad data, let's walk away
-    if (!valid)
-        return false;
-    
-    // if we get here we have a valid image
-    const reader = new FileReader();
-    
-    reader.onload = (e) => {
-        // do something with the data result
-        const dataURL = e.target.result;
-        const image = createElement('img', null, { src: dataURL });
-        document.body.appendChild(image);
-    };
-
-    // this returns a base64 image
-    reader.readAsDataURL(file);
 }
 
 /* 
