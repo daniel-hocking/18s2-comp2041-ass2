@@ -98,6 +98,15 @@ export default class API {
         });
     }
     
+    deletePost(token, post_id) {
+        return this.makeApiJsonRequest('post?id=' + post_id, {
+          method: "DELETE",
+          headers: {
+            "Authorization": "Token " + token,
+          },
+        });
+    }
+    
     getUser(token, user_id = null, user_name = null) {
       let query_string = '';
       if(user_id) {

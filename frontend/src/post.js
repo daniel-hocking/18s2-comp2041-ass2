@@ -9,7 +9,6 @@ export default class Post {
     this.user = user;
     this.current_image = null;
     this.can_update_feed = false;
-    this.next_scroll_point = 0;
     this.posts_p = 0;
     
     document.getElementById('create-post-btn').addEventListener('click', this.createPostForm.bind(this, null));
@@ -17,7 +16,9 @@ export default class Post {
   }
   
   updateFeedOnScroll() {
-    if(this.can_update_feed && (window.pageYOffset + window.innerHeight) > this.next_scroll_point) {
+    const next_scroll_point = document.body.scrollHeight - 350;
+    if(this.can_update_feed && (window.pageYOffset + window.innerHeight) > next_scroll_point) {
+      console.log(this.posts_p, next_scroll_point);
       this.can_update_feed = false;
       this.loadFeed(2);
     }
@@ -43,10 +44,8 @@ export default class Post {
             return parent;
           }, document.getElementById(feed_id));
           
-          this.next_scroll_point = document.body.scrollHeight - window.innerHeight - 250;
           this.posts_p += num_posts;
           this.can_update_feed = true;
-          console.log(this.posts_p, this.next_scroll_point);
         }
       });
   }
@@ -200,11 +199,29 @@ export default class Post {
     create_post_div.appendChild(helpers.createElement('br'));
     create_post_div.appendChild(helpers.createElement('br'));
     create_post_div.appendChild(upload_image_input);
+    const footer_div = helpers.createElement('div');
     const post_text = post ? 'Update post' : 'Create post';
     const new_post_button = helpers.createElement('button', post_text, { id: 'new-post-button', type: 'button', class: 'btn' });
     const post_id = post ? post.id : null;
     new_post_button.addEventListener('click', this.createPostSubmit.bind(this, post_id));
-    helpers.createModal(post_text, create_post_div, new_post_button);
+    if(post) {
+      const delete_post_button = helpers.createElement('button', 'Delete post', { id: 'delete-post-button', type: 'button', class: 'btn btn-danger', 'data-dismiss': 'modal' });
+      delete_post_button.addEventListener('click', this.deletePost.bind(this, post_id));
+      footer_div.appendChild(delete_post_button);
+    }
+    footer_div.appendChild(new_post_button);
+    helpers.createModal(post_text, create_post_div, footer_div);
+  }
+  
+  deletePost(post_id) {
+    this.api.deletePost(this.token, post_id)
+      .then(response => {
+        if(response.message === 'success') {
+          helpers.createAlert('You successfully deleted the post.', 'message-box', 'success');
+        } else {
+          helpers.createAlert('Failed to delete the post.', 'message-box');
+        }
+      });
   }
   
   imageUploaded(event) {

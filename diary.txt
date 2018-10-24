@@ -7,4 +7,5 @@
 21/10/18  15:00 17:00   Coding  More work on subset2 features, show likes and comments, like posts, better bootstrap integration for modals
 22/10/18  8:50  10:50   Coding  Improve the like/comment functionality, allow unlike and adding comments
 23/10/18  10:40 11:50   Coding  Ability create new posts, add modal form, get image data, submit to api, add an alert function
-24/10/18  13:40 17:20   Coding  User profile page, editable user details, other user view posts, edit posts, infinite scroll
+23/10/18  13:40 17:20   Coding  User profile page, editable user details, other user view posts, edit posts, infinite scroll
+24/10/18  19:30 20:00   Coding  Add ability to delete posts, fixes to infinite scroll
