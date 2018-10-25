@@ -13,6 +13,7 @@ export default class User {
       this.post = null
     }
     document.getElementById('view-profile-btn').addEventListener('click', this.createProfilePage.bind(this, null));
+    document.getElementById('follow-user-btn').addEventListener('click', this.createFollowForm.bind(this));
   }
   
   checkToken() {
@@ -37,6 +38,13 @@ export default class User {
     
     this.post = new Post(this);
     this.post.displayFeed();
+  }
+  
+  showUserPageSoon(author) {
+    const current_username = helpers.checkStore('username');
+    author = current_username === author ? null : author;
+    $('#modal-popup').modal('hide');
+    $('#modal-popup').on('hidden.bs.modal', this.createProfilePage.bind(this, author));
   }
     
   createLoginForm() {
@@ -116,7 +124,8 @@ export default class User {
           for(const user_id of user.following) {
             this.api.getUser(this.token, user_id)
               .then(followed_user => {
-                following_fieldset.appendChild(helpers.createElement('span', followed_user.username, { class: 'badge' }));
+                const user_badge = following_fieldset.appendChild(helpers.createElement('span', followed_user.username, { class: 'badge clickable-name' }));
+                user_badge.addEventListener('click', this.showUserPageSoon.bind(this, followed_user.username));
               });
           }
         }
@@ -138,9 +147,100 @@ export default class User {
               });
           }
         }
+        
+        if(!my_profile) {
+          this.addUnFollowButton(user.id, profile_username);
+        }
       });
       
-    helpers.createModal(my_profile ? 'My profile' : profile_username + '\'s profile', profile_div);
+    const follow_div = helpers.createElement('div', null, { id: 'follow-btn-div' });
+    helpers.createModal(my_profile ? 'My profile' : profile_username + '\'s profile', profile_div, null, follow_div);
+  }
+  
+  createFollowForm() {
+    const follow_form = helpers.createElement('div', null, { id: 'follow-form', class: 'follow-form' });
+    follow_form.appendChild(helpers.createElement('input', null, { id: 'follow-username', type: 'text', name: 'follow_username', placeholder: 'User to follow' }));
+    const follow_button = helpers.createElement('button', 'Follow user', { class: 'btn' });
+    follow_button.addEventListener('click', this.onFollowSubmit.bind(this));
+    
+    helpers.createModal('Follow user', follow_form, follow_button);
+  }
+  
+  onFollowSubmit() {
+    const username = document.getElementById('follow-username').value;
+    if(username.length === 0) {
+      helper.createAlert('You must enter a user to follow.', 'modal-messages');
+      return false;
+    }
+    
+    this.followUser(username);
+  }
+  
+  addUnFollowButton(user_id, username) {
+    this.api.getUser(this.token, null, helpers.checkStore('username'))
+      .then(user => {
+        const follow_div = document.getElementById('follow-btn-div');
+        follow_div.innerHTML = '';
+        if(user.following.filter((id)=> id == user_id).length) {
+          const unfollow_button = follow_div.appendChild(helpers.createElement('button', 'Unfollow', { class: 'btn btn-warning follow-btn' }));
+          unfollow_button.addEventListener('click', this.unFollowUser.bind(this, username, user_id));
+        } else {
+          const follow_button = follow_div.appendChild(helpers.createElement('button', 'Follow', { class: 'btn btn-primary follow-btn' }));
+          follow_button.addEventListener('click', this.followUser.bind(this, username, user_id));
+        }
+      });
+  }
+  
+  unFollowUser(username, user_id) {
+    const message_id = user_id ? 'modal-messages' : 'message-box';
+    this.api.unFollowUser(this.token, username)
+      .then(follow => {
+          if(follow.status !== 200) {
+            if(follow.status === 400) {
+              helpers.createAlert('Malformed Request.', message_id);
+            } else if(follow.status === 403) {
+              helpers.createAlert('Invalid Auth Token.', message_id);
+            } else if(follow.status === 404) {
+              helpers.createAlert('User Not Found.', message_id);
+            } else {
+              helpers.createAlert('An error occurred when submitting the unfollow form.', message_id);
+            }
+            return false;
+          }
+          
+          helpers.createAlert('The user: ' + username + ' has been unfollowed.', message_id, 'success');
+          if(user_id) {
+            this.addUnFollowButton(user_id, username);
+          } else {
+            $('#modal-popup').modal('hide');
+          }
+      });
+  }
+  
+  followUser(username, user_id) {
+    const message_id = user_id ? 'modal-messages' : 'message-box';
+    this.api.followUser(this.token, username)
+      .then(follow => {
+          if(follow.status !== 200) {
+            if(follow.status === 400) {
+              helpers.createAlert('Malformed Request.', message_id);
+            } else if(follow.status === 403) {
+              helpers.createAlert('Invalid Auth Token.', message_id);
+            } else if(follow.status === 404) {
+              helpers.createAlert('User Not Found.', message_id);
+            } else {
+              helpers.createAlert('An error occurred when submitting the follow form.', message_id);
+            }
+            return false;
+          }
+          
+          helpers.createAlert('The user: ' + username + ' has been followed.', message_id, 'success');
+          if(user_id) {
+            this.addUnFollowButton(user_id, username);
+          } else {
+            $('#modal-popup').modal('hide');
+          }
+      });
   }
   
   updateProfile() {
@@ -156,16 +256,29 @@ export default class User {
       const username = document.getElementById('login-username').value;
       const password = document.getElementById('login-password').value;
 
+      if(username.length === 0 || password.length === 0) {
+          helpers.createAlert('Please enter a username and password.', 'message-box');
+          return false;
+      }
+      
       this.api.checkLogin(username, password)
         .then(login => {
-          if(login.status !== 200)
+          if(login.status !== 200) {
+            if(login.status === 400) {
+              helpers.createAlert('Missing Username/Password.', 'message-box');
+            } else if(login.status === 403) {
+              helpers.createAlert('Invalid Username/Password.', 'message-box');
+            } else {
+              helpers.createAlert('An error occurred when submitting the login form.', 'message-box');
+            }
             return false;
+          }
             
           login.json()
             .then(login_token => {
               this.loginUser(login_token, username, 'login-form');
           });
-      })
+      });
     });
   }
   
@@ -175,11 +288,29 @@ export default class User {
       const register_password = document.getElementById('register-password').value;
       const register_email = document.getElementById('register-email').value;
       const register_name = document.getElementById('register-name').value;
+      
+      if(register_username.length === 0 || register_password.length === 0 || 
+        register_email.length === 0 || register_name.length === 0) {
+          helpers.createAlert('Please enter a value into each of the fields.', 'message-box');
+          return false;
+      }
+      if(!helpers.validateEmail(register_email)) {
+        helpers.createAlert('Invalid email address.', 'message-box');
+        return false;
+      }
 
       this.api.reigtserUser(register_username, register_password, register_email, register_name)
         .then(register => {
-          if(register.status !== 200)
+          if(register.status !== 200) {
+            if(register.status === 400) {
+              helpers.createAlert('Missing Username/Password.', 'message-box');
+            } else if(register.status === 409) {
+              helpers.createAlert('The provided username was already taken.', 'message-box');
+            } else {
+              helpers.createAlert('An error occurred when submitting the registration form.', 'message-box');
+            }
             return false;
+          }
             
           register.json()
             .then(register_token => {

@@ -9,3 +9,4 @@
 23/10/18  10:40 11:50   Coding  Ability create new posts, add modal form, get image data, submit to api, add an alert function
 23/10/18  13:40 17:20   Coding  User profile page, editable user details, other user view posts, edit posts, infinite scroll
 24/10/18  19:30 20:00   Coding  Add ability to delete posts, fixes to infinite scroll
+25/10/18  13:45 17:15   Coding  Lots of small appearance improvements and validation logic, improved dates, follow/unfollow

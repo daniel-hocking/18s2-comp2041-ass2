@@ -139,6 +139,24 @@ export default class API {
       });
     }
     
+    followUser(token, username) {
+      return this.makeApiRequest('user/follow?username=' + username, {
+        method: "PUT",
+        headers: {
+          "Authorization": "Token " + token,
+        },
+      });
+    }
+    
+    unFollowUser(token, username) {
+      return this.makeApiRequest('user/unfollow?username=' + username, {
+        method: "PUT",
+        headers: {
+          "Authorization": "Token " + token,
+        },
+      });
+    }
+    
     postComment(token, post_id, comment) {
         return this.makeApiJsonRequest('post/comment?id=' + post_id, {
           method: "PUT",

@@ -54,17 +54,20 @@ footer {
 }
 
 .post-title {
-    padding: 20px 40px;
-    margin: 0;
+    padding: 20px 20px;
+    margin: 0 5px  10px 5px;
     border-bottom: 1px solid rgba(0,0,0,.0975);
 }
 
 .post-footer {
     padding: 5px;
+    border-top: 1px solid rgba(0,0,0,.0975);
+    margin: 10px 5px  5px 5px;
 }
 
 .post-date {
     float: right;
+    font-size: 1rem;
 }
 
 .post-like-comments {
@@ -80,7 +83,8 @@ footer {
 }
 
 .post-image {
-    width: 640px;
+    margin: 0px 10px;
+    width: 620px;
 }
 
 @media screen and (max-width: 500px) {
@@ -121,7 +125,8 @@ nav ul.navbar-nav {
 }
 
 li.nav-item {
-  margin: auto 10px;
+  margin: 5px 10px;
+  padding: 5px 10px;
 }
 
 /* Add your styles here */
@@ -160,7 +165,7 @@ li.nav-item {
   font-weight: bold;
 }
 
-.clickable {
+.clickable, .clickable-name {
   cursor: pointer;
 }
 
@@ -226,4 +231,19 @@ li.nav-item {
 #message-box {
   width: 640px;
   margin: 10px auto;
+}
+
+input {
+  padding: 0px 5px;
+}
+
+.main-nav .nav-item {
+  min-width: 105px;
+}
+
+button.follow-btn {
+  font-size: 1em;
+  padding: 0px 3px;
+  margin-top: 3px;
+  margin-left: 10px;
 }

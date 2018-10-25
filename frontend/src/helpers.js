@@ -15,9 +15,23 @@ export function padNum(num, pad_by = 2, pad_with = '0') {
     return num.toString().padStart(pad_by, pad_with);
 }
 
-export function formatDate(date_in) {
-    const date_ob = new Date(date_in);
-    return `${padNum(date_ob.getHours())}:${padNum(date_ob.getMinutes())} ${padNum(date_ob.getDate())}/${padNum(date_ob.getMonth()+1)}/${date_ob.getFullYear()}`;
+export function formatDate(date_in, relative = true) {
+  const date_stamp = parseInt(date_in) * 1000;
+  const date_ob = new Date(date_stamp);
+  if(relative) {
+    const time_now = Date.now();
+    const time_diff = time_now - date_stamp;
+    if(time_diff < 60000) {
+      return `${Math.floor(time_diff / 1000)} seconds ago`;
+    } else if(time_diff < 3600000) {
+      const minute_s = time_diff < 120000 ? "minute" : "minutes"
+      return `${Math.floor(time_diff / 60000)} ${minute_s} ago`;
+    } else if(time_diff < 86400000) {
+      const hour_s = time_diff < 7200000 ? "hour" : "hours"
+      return `${Math.floor(time_diff / 3600000)} ${hour_s} ago`;
+    }
+  }
+  return `${padNum(date_ob.getHours())}:${padNum(date_ob.getMinutes())} ${padNum(date_ob.getDate())}/${padNum(date_ob.getMonth()+1)}/${date_ob.getFullYear()}`;
 }
 
 export function appendNodeTo(id_name, child_node) {
@@ -38,7 +52,17 @@ export function createAlert(message, parent_id, type = 'danger') {
   const dismiss_cross = createElement('span', '×', { 'aria-hidden': 'true' });
   dismiss_button.appendChild(dismiss_cross);
   new_node.appendChild(dismiss_button);
+  setTimeout(()=> {
+    if(parent_node.contains(new_node))
+      parent_node.removeChild(new_node);
+  }, 5000);
   parent_node.appendChild(new_node);
+}
+
+// From stackoverflow: https://stackoverflow.com/a/46181
+export function validateEmail(email) {
+    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
 }
 
 /**
@@ -62,7 +86,7 @@ export function createElement(tag, data, options = {}, child = null) {
         }, el);
 }
 
-export function createModal(title, body, footer = null) {
+export function createModal(title, body, footer = null, header = null) {
   const modal_outer = createElement('div', null, { class: 'modal fade', id: 'modal-popup',  role: 'dialog', 'aria-labelledby': 'modal-title', 'aria-hidden': 'true' });
   const modal_inner = createElement('div', null, { class: 'modal-dialog modal-dialog-centered', role: 'document' });
   const modal_content = createElement('div', null, { class: 'modal-content' });
@@ -70,9 +94,15 @@ export function createModal(title, body, footer = null) {
   const modal_heading = createElement('h5', title, { class: 'modal-title', id: 'modal-title' });
   const modal_button = createElement('button', null, { class: 'close', type: 'button', 'data-dismiss': 'modal', 'aria-label': 'Close' }, createElement('span', '×', { 'aria-hidden': 'true' }));
   
-  const modal_body = createElement('div', null, { class: 'modal-body' }, body);
+  const modal_body = createElement('div', null, { class: 'modal-body' });
+  modal_body.appendChild(createElement('div', null, { id: 'modal-messages' }));
+  modal_body.appendChild(body);
   
   modal_header.appendChild(modal_heading);
+  if(header) {
+    console.log(header);
+    modal_header.appendChild(header);
+  }
   modal_header.appendChild(modal_button);
   modal_content.appendChild(modal_header);
   modal_content.appendChild(modal_body);

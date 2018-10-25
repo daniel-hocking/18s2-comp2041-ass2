@@ -58,10 +58,11 @@ export default class Post {
   createPostTile(post, full_post = true, editable = false) {
       const section = helpers.createElement('section', null, { class: 'post' });
 
-      const post_title = section.appendChild(helpers.createElement('h2', post.meta.author, { class: 'post-title clickable' }));
+      const post_title = section.appendChild(helpers.createElement('h2', null, { class: 'post-title' }));
+      const post_author = post_title.appendChild(helpers.createElement('span', post.meta.author, { class: 'clickable' }));
       if(full_post)
-        post_title.addEventListener('click', this.loadUserPage.bind(this, post.meta.author));
-      post_title.appendChild(helpers.createElement('span', helpers.formatDate(parseInt(post.meta.published) * 1000), { class: 'post-date'}));
+        post_author.addEventListener('click', this.loadUserPage.bind(this, post.meta.author));
+      post_title.appendChild(helpers.createElement('span', helpers.formatDate(post.meta.published), { class: 'post-date'}));
 
       const img_element = section.appendChild(helpers.createElement('img', null, 
           { src: 'data:image/png;base64,'+post.src, alt: post.meta.description_text, class: 'post-image clickable' }));
@@ -109,7 +110,8 @@ export default class Post {
         for(const user_id of post.meta.likes) {
           this.api.getUser(this.token, user_id)
             .then(user => {
-              likers_list.appendChild(helpers.createElement('span', user.username, { class: 'badge' }));
+              const user_badge = likers_list.appendChild(helpers.createElement('span', user.username, { class: 'badge clickable-name' }));
+              user_badge.addEventListener('click', this.user.showUserPageSoon.bind(this.user, user.username));
               
               num_likes -=1;
               if(current_username === user.username)
@@ -155,7 +157,7 @@ export default class Post {
     const comments_div = helpers.createElement('div', null, { id: 'comments-div' });
     const new_comment_div = helpers.createElement('div', null, { id: 'new-comment-div' });
     new_comment_div.appendChild(helpers.createElement('input', null, { id: 'new-comment-text', type: 'text' }));
-    const new_comment_button = helpers.createElement('button', 'Post comment', { id: 'new-comment-button', type: 'button', class: 'btn', 'data-dismiss': 'modal' });
+    const new_comment_button = helpers.createElement('button', 'Post comment', { id: 'new-comment-button', type: 'button', class: 'btn' });
     new_comment_div.appendChild(new_comment_button);
     helpers.createModal('Comments', comments_div, new_comment_div);
     this.api.getPost(this.token, post_id)
@@ -164,8 +166,9 @@ export default class Post {
         for(const comment of post.comments) {
           const comment_div = helpers.createElement('div', null, { class: 'comment-div' });
           const comment_header = helpers.createElement('div');
-          comment_header.appendChild(helpers.createElement('span', comment.author, { class: 'badge' }));
-          comment_header.appendChild(helpers.createElement('div', helpers.formatDate(parseInt(comment.published) * 1000), { class: 'float-right' }));
+          const user_badge = comment_header.appendChild(helpers.createElement('span', comment.author, { class: 'badge clickable-name' }));
+          user_badge.addEventListener('click', this.user.showUserPageSoon.bind(this.user, comment.author));
+          comment_header.appendChild(helpers.createElement('div', helpers.formatDate(comment.published), { class: 'float-right' }));
           comment_div.appendChild(comment_header);
           comment_div.appendChild(helpers.createElement('div', comment.comment));
           comments_div.appendChild(comment_div);
@@ -175,26 +178,32 @@ export default class Post {
   
   postComment(post_id, num_comments) {
     const comment = document.getElementById('new-comment-text').value;
-    console.log(this.token, post_id, comment);
+    if(comment.length === 0) {
+        helpers.createAlert('Please enter a comment.', 'modal-messages');
+        return false;
+    }
     this.api.postComment(this.token, post_id, comment)
       .then(response => {
-        if(response.message === 'success')
-          document.getElementById('comments-badge-' + post_id).innerText = `Comments: ${num_comments + 1}`;
+        if(response.message !== "success") {
+          helpers.createAlert(response.message, 'modal-messages');
+          return false;
+        }
+        helpers.createAlert('Comment added successfully.', 'message-box', 'success');
+        document.getElementById('comments-badge-' + post_id).innerText = `Comments: ${num_comments + 1}`;
+        $('#modal-popup').modal('hide');
       });
   }
   
   createPostFormSoon(post) {
     $('#modal-popup').on('hidden.bs.modal', this.createPostForm.bind(this, post));
   }
-  
+
   createPostForm(post) {
     this.current_image = post ? post.src : null
     const create_post_div = helpers.createElement('div', null, { id: 'create-post-div' });
-    const create_post_messages = helpers.createElement('div', null, { id: 'create-post-messages' });
     const description_input = helpers.createElement('input', null, { id: 'description-input', type: 'text', placeholder: 'Post description', value: post ? post.meta.description_text : '' });
     const upload_image_input = helpers.createElement('input', null, { id: 'upload-image-input', type: 'file' });
     upload_image_input.addEventListener('change', this.imageUploaded.bind(this));
-    create_post_div.appendChild(create_post_messages);
     create_post_div.appendChild(description_input);
     create_post_div.appendChild(helpers.createElement('br'));
     create_post_div.appendChild(helpers.createElement('br'));
@@ -250,7 +259,7 @@ export default class Post {
   createPostSubmit(post_id) {
     const post_desc = document.getElementById('description-input').value;
     if(!post_desc || !this.current_image) {
-      helpers.createAlert('You must enter both a description and select an image before you can create a post.', 'create-post-messages');
+      helpers.createAlert('You must enter both a description and select an image before you can create a post.', 'modal-messages');
       return false;
     }
     
