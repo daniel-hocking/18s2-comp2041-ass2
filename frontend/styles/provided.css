@@ -108,7 +108,7 @@ footer {
 
 /* To override some of the styles of bootstrap */
 button.btn {
-   font-size: 1.5em;
+   font-size: 1em;
    border-radius: 0.5em;
 }
 
@@ -169,8 +169,20 @@ li.nav-item {
   cursor: pointer;
 }
 
+.clickable:hover,
+.clickable-name:hover {
+  outline: none;
+  border-color: #9ecaed;
+  box-shadow: 0 0 20px #9ecaed;
+}
+
 .modal .clickable {
   cursor: initial;
+}
+
+.modal .clickable:hover {
+  border-color: initial;
+  box-shadow: initial;
 }
 
 .comment-div {
@@ -216,7 +228,8 @@ li.nav-item {
 }
 
 .modal .post-image {
-  max-width: 100%;
+  max-width: 96%;
+  margin: 0 2%;
 }
 
 .modal .post-title {
@@ -246,4 +259,9 @@ button.follow-btn {
   padding: 0px 3px;
   margin-top: 3px;
   margin-left: 10px;
+}
+
+.btn-edit-post {
+  margin: 10px;
+  float: right;
 }

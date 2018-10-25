@@ -34,6 +34,12 @@ export default class Post {
     this.loadFeed();
   }
   
+  resetFeed() {
+    document.getElementById('large-feed').innerHTML = '';
+    this.posts_p = 0;
+    this.loadFeed();
+  }
+  
   loadFeed(num_posts = 4, feed_id = 'large-feed') {
     this.api.getFeed(this.token, this.posts_p, num_posts)
       .then(posts => {
@@ -85,7 +91,7 @@ export default class Post {
       post_footer.appendChild(like_comment);
       
       if(editable) {
-        const edit_post_button = section.appendChild(helpers.createElement('button', 'Edit post', { type: 'button', class: 'btn', 'data-dismiss': 'modal' }));
+        const edit_post_button = section.appendChild(helpers.createElement('button', 'Edit post', { type: 'button', class: 'btn btn-primary btn-edit-post', 'data-dismiss': 'modal' }));
         console.log(edit_post_button);
         edit_post_button.addEventListener('click', this.createPostFormSoon.bind(this, post));
       }
@@ -125,11 +131,11 @@ export default class Post {
   setupLikeUnButton(like_button_div, num_likes, current_user_found, post) {
     if(num_likes === 0) {
       if(current_user_found) {
-        const unlike_button = helpers.createElement('button', 'I hate this', { type: 'button', class: 'btn', 'data-dismiss': 'modal' });
+        const unlike_button = helpers.createElement('button', 'I hate this', { type: 'button', class: 'btn btn-primary', 'data-dismiss': 'modal' });
         unlike_button.addEventListener('click', this.unlikePost.bind(this, post.id, post.meta.likes.length));
         like_button_div.appendChild(unlike_button);
       } else {
-        const like_button = helpers.createElement('button', 'I like this', { type: 'button', class: 'btn', 'data-dismiss': 'modal' });
+        const like_button = helpers.createElement('button', 'I like this', { type: 'button', class: 'btn btn-primary', 'data-dismiss': 'modal' });
         like_button.addEventListener('click', this.likePost.bind(this, post.id, post.meta.likes.length));
         like_button_div.appendChild(like_button);
       }
@@ -157,7 +163,7 @@ export default class Post {
     const comments_div = helpers.createElement('div', null, { id: 'comments-div' });
     const new_comment_div = helpers.createElement('div', null, { id: 'new-comment-div' });
     new_comment_div.appendChild(helpers.createElement('input', null, { id: 'new-comment-text', type: 'text' }));
-    const new_comment_button = helpers.createElement('button', 'Post comment', { id: 'new-comment-button', type: 'button', class: 'btn' });
+    const new_comment_button = helpers.createElement('button', 'Post comment', { id: 'new-comment-button', type: 'button', class: 'btn btn-primary' });
     new_comment_div.appendChild(new_comment_button);
     helpers.createModal('Comments', comments_div, new_comment_div);
     this.api.getPost(this.token, post_id)
@@ -210,7 +216,7 @@ export default class Post {
     create_post_div.appendChild(upload_image_input);
     const footer_div = helpers.createElement('div');
     const post_text = post ? 'Update post' : 'Create post';
-    const new_post_button = helpers.createElement('button', post_text, { id: 'new-post-button', type: 'button', class: 'btn' });
+    const new_post_button = helpers.createElement('button', post_text, { id: 'new-post-button', type: 'button', class: 'btn btn-primary' });
     const post_id = post ? post.id : null;
     new_post_button.addEventListener('click', this.createPostSubmit.bind(this, post_id));
     if(post) {

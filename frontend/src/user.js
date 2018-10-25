@@ -109,7 +109,7 @@ export default class User {
           const password_input = helpers.createElement('input', null, { id: 'password-profile-input', type: 'password', placeholder: 'password' });
           basics_fieldset.appendChild(helpers.createElement('div', 'Password: ', { class: 'spaced-item' }, password_input));
           
-          const update_profile_button = helpers.createElement('button', 'Update profile', { id: 'update-profile-button', type: 'button', class: 'btn', 'data-dismiss': 'modal' });
+          const update_profile_button = helpers.createElement('button', 'Update profile', { id: 'update-profile-button', type: 'button', class: 'btn btn-primary', 'data-dismiss': 'modal' });
           update_profile_button.addEventListener('click', this.updateProfile.bind(this));
           basics_fieldset.appendChild(update_profile_button);
         } else {
@@ -160,7 +160,7 @@ export default class User {
   createFollowForm() {
     const follow_form = helpers.createElement('div', null, { id: 'follow-form', class: 'follow-form' });
     follow_form.appendChild(helpers.createElement('input', null, { id: 'follow-username', type: 'text', name: 'follow_username', placeholder: 'User to follow' }));
-    const follow_button = helpers.createElement('button', 'Follow user', { class: 'btn' });
+    const follow_button = helpers.createElement('button', 'Follow user', { class: 'btn btn-primary' });
     follow_button.addEventListener('click', this.onFollowSubmit.bind(this));
     
     helpers.createModal('Follow user', follow_form, follow_button);
@@ -169,7 +169,7 @@ export default class User {
   onFollowSubmit() {
     const username = document.getElementById('follow-username').value;
     if(username.length === 0) {
-      helper.createAlert('You must enter a user to follow.', 'modal-messages');
+      helpers.createAlert('You must enter a user to follow.', 'modal-messages');
       return false;
     }
     
@@ -218,7 +218,7 @@ export default class User {
   }
   
   followUser(username, user_id) {
-    const message_id = user_id ? 'modal-messages' : 'message-box';
+    const message_id = 'modal-messages';
     this.api.followUser(this.token, username)
       .then(follow => {
           if(follow.status !== 200) {
@@ -235,6 +235,7 @@ export default class User {
           }
           
           helpers.createAlert('The user: ' + username + ' has been followed.', message_id, 'success');
+          this.post.resetFeed();
           if(user_id) {
             this.addUnFollowButton(user_id, username);
           } else {
