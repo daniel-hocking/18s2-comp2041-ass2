@@ -35,15 +35,7 @@ class Post(Resource):
             abort(400, "description_text cannot be empty")
         if src == "":
             abort(400, "src cannot be empty")
-        try:
-            size = (150,150)
-            im = Image.open(BytesIO(base64.b64decode(src)))
-            im.thumbnail(size, Image.ANTIALIAS)
-            buffered = BytesIO()
-            im.save(buffered, format='PNG')
-            thumbnail = base64.b64encode(buffered.getvalue()).decode("utf-8")
-        except:
-            abort(400,'Image Data Could Not Be Processed')
+        thumbnail = self._gen_thumbnail(src)
         post_id=db.insert('POST').with_values(
             author=u_username,
             description=desc,
@@ -55,6 +47,17 @@ class Post(Resource):
         return {
             'post_id': post_id
         }
+
+    def _gen_thumbnail(self, src):
+        try:
+            size = (150,150)
+            im = Image.open(BytesIO(base64.b64decode(src)))
+            im.thumbnail(size, Image.ANTIALIAS)
+            buffered = BytesIO()
+            im.save(buffered, format='PNG')
+            return base64.b64encode(buffered.getvalue()).decode("utf-8")
+        except:
+            abort(400,'Image Data Could Not Be Processed')
 
     @posts.response(200, 'Success')
     @posts.response(403, 'Invalid Auth Token / Unauthorized to edit Post')
@@ -93,6 +96,7 @@ class Post(Resource):
             updated['description'] = desc
         if src:
             updated['src'] = src
+            updated['thumbnail'] = self._gen_thumbnail(src)
         db.update('POST').set(**updated).where(id=id).execute()
         return {
             'message': 'success'
@@ -127,6 +131,7 @@ class Post(Resource):
         return {
             'message': 'success'
         }
+
     @posts.response(200, 'Success',post_details)
     @posts.response(400, 'Malformed Request')
     @posts.response(404, 'Post Not Found')
