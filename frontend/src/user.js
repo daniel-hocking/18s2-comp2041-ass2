@@ -31,7 +31,6 @@ export default class User {
   }
   
   loginUser(token, username, form_id) {
-    console.log(token);
     this.setToken(token.token);
     helpers.setStore('username', username);
     helpers.removeFrom('main-section', form_id);
@@ -84,7 +83,6 @@ export default class User {
   }
   
   createProfilePage(profile_username) {
-    console.log(profile_username);
     const my_profile = profile_username === null ? true : false;
     const profile_div = helpers.createElement('div', null, { id: 'profile-div', class: 'profile-div' });
     const basics_fieldset = helpers.createElement('fieldset', null, { id: 'basics-profile-fieldset' });
@@ -138,14 +136,16 @@ export default class User {
           const likes_badge = helpers.createElement('span', 'Total likes: ' + total_likes, { class: 'badge' });
           posts_fieldset.appendChild(likes_badge);
           const profile_posts_div = posts_fieldset.appendChild(helpers.createElement('div', null, { class: 'profile-posts-div' }));
-          for(const post_id of user.posts) {
-            this.api.getPost(this.token, post_id)
-              .then(post => {
+          
+          this.api.getPosts(this.token, user.posts)
+            .then(posts => {
+              posts.sort((x, y) => x.meta.published < y.meta.published);
+              for(const post of posts) {
                 total_likes += post.meta.likes.length;
-                likes_badge.innerText = 'Total likes: ' + total_likes;
                 profile_posts_div.appendChild(this.post.createPostTile(post, false, my_profile));
-              });
-          }
+              }
+              likes_badge.innerText = 'Total likes: ' + total_likes;
+            });
         }
         
         if(!my_profile) {
@@ -234,7 +234,7 @@ export default class User {
             return false;
           }
           
-          helpers.createAlert('The user: ' + username + ' has been followed.', message_id, 'success');
+          helpers.createAlert('The user: ' + username + ' has been followed.', user_id ? user_id : 'message-box', 'success');
           this.post.resetFeed();
           if(user_id) {
             this.addUnFollowButton(user_id, username);
@@ -300,7 +300,7 @@ export default class User {
         return false;
       }
 
-      this.api.reigtserUser(register_username, register_password, register_email, register_name)
+      this.api.registerUser(register_username, register_password, register_email, register_name)
         .then(register => {
           if(register.status !== 200) {
             if(register.status === 400) {

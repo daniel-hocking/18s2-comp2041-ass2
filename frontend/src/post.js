@@ -18,7 +18,6 @@ export default class Post {
   updateFeedOnScroll() {
     const next_scroll_point = document.body.scrollHeight - 350;
     if(this.can_update_feed && (window.pageYOffset + window.innerHeight) > next_scroll_point) {
-      console.log(this.posts_p, next_scroll_point);
       this.can_update_feed = false;
       this.loadFeed(2);
     }
@@ -43,7 +42,6 @@ export default class Post {
   loadFeed(num_posts = 4, feed_id = 'large-feed') {
     this.api.getFeed(this.token, this.posts_p, num_posts)
       .then(posts => {
-        console.log(posts);
         if(posts && posts['posts'].length) {
           posts['posts'].reduce((parent, post) => {
             parent.appendChild(this.createPostTile(post));
@@ -92,7 +90,6 @@ export default class Post {
       
       if(editable) {
         const edit_post_button = section.appendChild(helpers.createElement('button', 'Edit post', { type: 'button', class: 'btn btn-primary btn-edit-post', 'data-dismiss': 'modal' }));
-        console.log(edit_post_button);
         edit_post_button.addEventListener('click', this.createPostFormSoon.bind(this, post));
       }
 
@@ -169,6 +166,7 @@ export default class Post {
     this.api.getPost(this.token, post_id)
       .then(post => {
         new_comment_button.addEventListener('click', this.postComment.bind(this, post_id, post.comments.length));
+        post.comments.sort((x, y) => x.published < y.published);
         for(const comment of post.comments) {
           const comment_div = helpers.createElement('div', null, { class: 'comment-div' });
           const comment_header = helpers.createElement('div');
@@ -246,9 +244,10 @@ export default class Post {
     const valid = validFileTypes.find(type => type === file.type);
 
     // bad data, let's walk away
-    if (!valid)
+    if (!valid) {
+      helpers.createAlert('Image must be of type PNG.', 'modal-messages');
       return false;
-    
+    }
     // if we get here we have a valid image
     const reader = new FileReader();
     
@@ -270,9 +269,39 @@ export default class Post {
     }
     
     if(post_id) {
-      this.api.updatePost(this.token, post_desc, this.current_image, post_id);
+      this.api.updatePost(this.token, post_desc, this.current_image, post_id)
+        .then(post => {
+          if(post.status !== 200) {
+            if(post.status === 400) {
+              helpers.createAlert('Malformed Request.', 'modal-messages');
+            } else if(post.status === 403) {
+              helpers.createAlert('Invalid Auth Token.', 'modal-messages');
+            } else if(post.status === 404) {
+              helpers.createAlert('Post Not Found.', 'modal-messages');
+            } else {
+              helpers.createAlert('An error occurred when submitting the update post form.', 'modal-messages');
+            }
+            return false;
+          }
+          
+          helpers.createAlert('The post has been updated.', 'message-box', 'success');
+      });
     } else {
-      this.api.createPost(this.token, post_desc, this.current_image);
+      this.api.createPost(this.token, post_desc, this.current_image)
+        .then(post => {
+          if(post.status !== 200) {
+            if(post.status === 400) {
+              helpers.createAlert('Malformed Request.', 'modal-messages');
+            } else if(post.status === 403) {
+              helpers.createAlert('Invalid Auth Token.', 'modal-messages');
+            } else {
+              helpers.createAlert('An error occurred when submitting the create post form.', 'modal-messages');
+            }
+            return false;
+          }
+          
+          helpers.createAlert('The post has been created.', 'message-box', 'success');
+      });
     }
     $('#modal-popup').modal('hide');
   }

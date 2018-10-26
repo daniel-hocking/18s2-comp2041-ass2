@@ -11,3 +11,4 @@
 24/10/18  19:30 20:00   Coding  Add ability to delete posts, fixes to infinite scroll
 25/10/18  13:45 17:15   Coding  Lots of small appearance improvements and validation logic, improved dates, follow/unfollow
 25/10/18  21:00 21:45   Coding  Lots of small appearance improvements and also fix for when following to reset feed
+26/10/18  13:30 14:30   Coding  Testing and fixing a few small issues, mainly with post ordering and message display

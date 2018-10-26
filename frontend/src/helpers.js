@@ -100,7 +100,6 @@ export function createModal(title, body, footer = null, header = null) {
   
   modal_header.appendChild(modal_heading);
   if(header) {
-    console.log(header);
     modal_header.appendChild(header);
   }
   modal_header.appendChild(modal_button);

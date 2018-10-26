@@ -45,7 +45,7 @@ export default class API {
         });
     }
     
-    reigtserUser(register_username, register_password, register_email, register_name) {
+    registerUser(register_username, register_password, register_email, register_name) {
         return this.makeApiRequest('auth/signup', {
           method: "POST",
           body: JSON.stringify({
@@ -96,6 +96,18 @@ export default class API {
             "Authorization": "Token " + token,
           },
         });
+    }
+    
+    getPosts(token, post_ids) {
+      const promises = [];
+      for(const post_id of post_ids) {
+        promises.push(this.makeApiJsonRequest('post?id=' + post_id, {
+          headers: {
+            "Authorization": "Token " + token,
+          },
+        }));
+      }
+      return Promise.all(promises);
     }
     
     deletePost(token, post_id) {
@@ -172,7 +184,7 @@ export default class API {
     }
     
     createPost(token, desc, img) {
-        return this.makeApiJsonRequest('post', {
+        return this.makeApiRequest('post', {
           method: "POST",
           headers: {
             "Authorization": "Token " + token,
@@ -186,7 +198,7 @@ export default class API {
     }
     
     updatePost(token, desc, img, post_id) {
-        return this.makeApiJsonRequest('post?id=' + post_id, {
+        return this.makeApiRequest('post?id=' + post_id, {
           method: "PUT",
           headers: {
             "Authorization": "Token " + token,
