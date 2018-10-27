@@ -124,7 +124,7 @@ export default class Post {
         let current_username = helpers.checkStore('username');
         this.setupLikeUnButton(like_button_div, num_likes, current_user_found, post);
         for(const user_id of post.meta.likes) {
-          this.api.getUser(this.token, user_id)
+          this.api.getUser(this.token, user_id, null, false)
             .then(user => {
               if(!user || !user.username) {
                 helpers.createAlert('Could not contact the Instacram service.', 'modal-messages');
@@ -238,7 +238,7 @@ export default class Post {
   }
   
   updateCommentCount(post_id) {
-    this.api.getPost(this.token, post_id)
+    this.api.getPost(this.token, post_id, false)
       .then(post => {
         if(!post || !post.meta) {
           helpers.createAlert('Could not contact the Instacram service.', 'modal-messages');

@@ -150,3 +150,11 @@ export function setStore(key, value) {
         return null
 
 }
+
+export function showLoading() {
+  document.getElementById('loading-div').classList.add('loading-show');
+}
+
+export function hideLoading() {
+  document.getElementById('loading-div').classList.remove('loading-show');
+}

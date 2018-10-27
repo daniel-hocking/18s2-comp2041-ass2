@@ -1,33 +1,32 @@
-// change this when you integrate with the real API, or when u start using the dev server
+import { showLoading, hideLoading } from './helpers.js';
+
 const API_URL = 'http://localhost:5000/'
 
-/**
- * This is a sample class API which you may base your code on.
- * You don't have to do this as a class.
- */
 export default class API {
 
-    /**
-     * Defaults to teh API URL
-     * @param {string} url 
-     */
     constructor(url = API_URL) {
         this.url = url;
     }
     
-    makeApiRequest(path, options) {
+    makeApiRequest(path, options, show = true) {
+      if(show)
+        showLoading();
       return fetch(this.url + path, options)
+        .then(res => {
+          hideLoading();
+          return res;
+        })
         .catch(err => console.warn(`API_ERROR: ${err.message}`));
     }
 
-    makeApiJsonRequest(path, options) {
-      return this.makeApiRequest(path, options)
+    makeApiJsonRequest(path, options, show = true) {
+      return this.makeApiRequest(path, options, show)
         .then(res => res.json())
         .catch(err => console.warn(`API_ERROR: ${err.message}`));
     }
     
-    makeApiStatusRequest(path, options) {
-      return this.makeApiRequest(path, options)
+    makeApiStatusRequest(path, options, show = true) {
+      return this.makeApiRequest(path, options, show)
         .then(res => res.status)
         .catch(err => console.warn(`API_ERROR: ${err.message}`));
     }
@@ -78,34 +77,31 @@ export default class API {
       });
     }
 
-    /**
-     * @returns feed array in json format
-     */
     getFeed(token, p = 0, n = 4) {
       const query_string = '?p=' + p + '&n=' + n;
         return this.makeApiJsonRequest('user/feed' + query_string, {
           headers: {
             "Authorization": "Token " + token,
           },
-        });
+        }, p === 0);
     }
 
-    getPost(token, post_id) {
+    getPost(token, post_id, show = true) {
         return this.makeApiJsonRequest('post?id=' + post_id, {
           headers: {
             "Authorization": "Token " + token,
           },
-        });
+        }, show);
     }
     
-    getPosts(token, post_ids) {
+    getPosts(token, post_ids, show = true) {
       const promises = [];
       for(const post_id of post_ids) {
         promises.push(this.makeApiJsonRequest('post?id=' + post_id, {
           headers: {
             "Authorization": "Token " + token,
           },
-        }));
+        }, show));
       }
       return Promise.all(promises);
     }
@@ -119,7 +115,7 @@ export default class API {
         });
     }
     
-    getUser(token, user_id = null, user_name = null) {
+    getUser(token, user_id = null, user_name = null, show = true) {
       let query_string = '';
       if(user_id) {
         query_string = '?id=' + user_id;
@@ -130,7 +126,7 @@ export default class API {
         headers: {
           "Authorization": "Token " + token,
         },
-      });
+      }, show);
     }
     
     likePost(token, post_id) {

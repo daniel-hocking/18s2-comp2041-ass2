@@ -128,7 +128,7 @@ export default class User {
           following_fieldset.appendChild(helpers.createElement('div', 'Nobody yet', { class: 'spaced-item' }));
         } else {
           for(const user_id of user.following) {
-            this.api.getUser(this.token, user_id)
+            this.api.getUser(this.token, user_id, null, false)
               .then(followed_user => {
                 const user_badge = following_fieldset.appendChild(helpers.createElement('span', followed_user.username, { class: 'badge clickable-name' }));
                 user_badge.addEventListener('click', this.showUserPageSoon.bind(this, followed_user.username));
@@ -145,7 +145,7 @@ export default class User {
           posts_fieldset.appendChild(likes_badge);
           const profile_posts_div = posts_fieldset.appendChild(helpers.createElement('div', null, { class: 'profile-posts-div' }));
           
-          this.api.getPosts(this.token, user.posts)
+          this.api.getPosts(this.token, user.posts, false)
             .then(posts => {
               posts.sort((x, y) => x.meta.published < y.meta.published);
               for(const post of posts) {
@@ -185,7 +185,7 @@ export default class User {
   }
   
   addUnFollowButton(user_id, username) {
-    this.api.getUser(this.token, null, helpers.checkStore('username'))
+    this.api.getUser(this.token, null, helpers.checkStore('username'), false)
       .then(user => {
         const follow_div = document.getElementById('follow-btn-div');
         follow_div.innerHTML = '';
@@ -221,6 +221,7 @@ export default class User {
           }
           
           helpers.createAlert('The user: ' + username + ' has been unfollowed.', message_id, 'success');
+          this.post.resetFeed();
           if(user_id) {
             this.addUnFollowButton(user_id, username);
           } else {

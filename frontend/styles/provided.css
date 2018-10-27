@@ -265,3 +265,21 @@ button.follow-btn {
   margin: 10px;
   float: right;
 }
+
+.loading {
+  display: none;
+  background-image: url("spinner.gif");
+  z-index: 10000;
+  top: 0;
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-color: white;
+  background-position: center;
+  opacity: 0.7;
+}
+
+.loading-show {
+  display: initial;
+}

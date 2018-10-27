@@ -13,3 +13,4 @@
 25/10/18  21:00 21:45   Coding  Lots of small appearance improvements and also fix for when following to reset feed
 26/10/18  13:30 14:30   Coding  Testing and fixing a few small issues, mainly with post ordering and message display
 27/10/18  20:30 22:00   Testing Testing of the situation of backend not accessible and updating error messages to work with it
+28/10/18  9:00  10:00   Coding  Add loading animations to make things a bit smoother on slow connections
