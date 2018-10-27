@@ -42,15 +42,24 @@ export default class Post {
   loadFeed(num_posts = 4, feed_id = 'large-feed') {
     this.api.getFeed(this.token, this.posts_p, num_posts)
       .then(posts => {
-        if(posts && posts['posts'].length) {
-          posts['posts'].reduce((parent, post) => {
-            parent.appendChild(this.createPostTile(post));
-            return parent;
-          }, document.getElementById(feed_id));
-          
-          this.posts_p += num_posts;
-          this.can_update_feed = true;
+        if(!posts || !posts.posts) {
+          helpers.createAlert('Could not contact the Instacram service.', 'message-box');
+          document.getElementById(feed_id).appendChild(helpers.createElement('div', 'Could not load user feed', { class: 'post' }));
+          return false;
         }
+        
+        if(!posts.posts.length) {
+          document.getElementById(feed_id).appendChild(helpers.createElement('div', 'There are no posts to show in the feed, try and follow some more users', { class: 'post' }));
+          return false;
+        }
+
+        posts.posts.reduce((parent, post) => {
+          parent.appendChild(this.createPostTile(post));
+          return parent;
+        }, document.getElementById(feed_id));
+        
+        this.posts_p += num_posts;
+        this.can_update_feed = true;
       });
   }
   
@@ -106,6 +115,10 @@ export default class Post {
     helpers.createModal('Likes', likers_list, like_button_div);
     this.api.getPost(this.token, post_id)
       .then(post => {
+        if(!post || !post.meta) {
+          helpers.createAlert('Could not contact the Instacram service.', 'modal-messages');
+          return false;
+        }
         let num_likes = post.meta.likes.length;
         let current_user_found = false;
         let current_username = helpers.checkStore('username');
@@ -113,6 +126,10 @@ export default class Post {
         for(const user_id of post.meta.likes) {
           this.api.getUser(this.token, user_id)
             .then(user => {
+              if(!user || !user.username) {
+                helpers.createAlert('Could not contact the Instacram service.', 'modal-messages');
+                return false;
+              }
               const user_badge = likers_list.appendChild(helpers.createElement('span', user.username, { class: 'badge clickable-name' }));
               user_badge.addEventListener('click', this.user.showUserPageSoon.bind(this.user, user.username));
               
@@ -128,11 +145,11 @@ export default class Post {
   setupLikeUnButton(like_button_div, num_likes, current_user_found, post) {
     if(num_likes === 0) {
       if(current_user_found) {
-        const unlike_button = helpers.createElement('button', 'I hate this', { type: 'button', class: 'btn btn-primary', 'data-dismiss': 'modal' });
+        const unlike_button = helpers.createElement('button', 'I hate this', { type: 'button', class: 'btn btn-primary' });
         unlike_button.addEventListener('click', this.unlikePost.bind(this, post.id, post.meta.likes.length));
         like_button_div.appendChild(unlike_button);
       } else {
-        const like_button = helpers.createElement('button', 'I like this', { type: 'button', class: 'btn btn-primary', 'data-dismiss': 'modal' });
+        const like_button = helpers.createElement('button', 'I like this', { type: 'button', class: 'btn btn-primary' });
         like_button.addEventListener('click', this.likePost.bind(this, post.id, post.meta.likes.length));
         like_button_div.appendChild(like_button);
       }
@@ -142,8 +159,13 @@ export default class Post {
   likePost(post_id, num_likes) {
     this.api.likePost(this.token, post_id)
       .then(response => {
-        if(response.message === 'success')
-          document.getElementById('likes-badge-' + post_id).innerText = `Likes: ${num_likes + 1}`;
+        if(!response || response.message !== 'success') {
+          helpers.createAlert('Could not contact the Instacram service.', 'modal-messages');
+          return false;
+        }
+        document.getElementById('likes-badge-' + post_id).innerText = `Likes: ${num_likes + 1}`;
+        helpers.createAlert('Post has been liked.', 'message-box', 'success');
+        $('#modal-popup').modal('hide');
       });
     
   }
@@ -151,8 +173,13 @@ export default class Post {
   unlikePost(post_id, num_likes) {
     this.api.unlikePost(this.token, post_id)
       .then(response => {
-        if(response.message === 'success')
-          document.getElementById('likes-badge-' + post_id).innerText = `Likes: ${num_likes - 1}`;
+        if(!response || response.message !== 'success') {
+          helpers.createAlert('Could not contact the Instacram service.', 'modal-messages');
+          return false;
+        }
+         document.getElementById('likes-badge-' + post_id).innerText = `Likes: ${num_likes - 1}`;
+         helpers.createAlert('Post has been unliked.', 'message-box', 'success');
+        $('#modal-popup').modal('hide');
       });
   }
   
@@ -165,6 +192,11 @@ export default class Post {
     helpers.createModal('Comments', comments_div, new_comment_div);
     this.api.getPost(this.token, post_id)
       .then(post => {
+        if(!post || !post.meta) {
+          helpers.createAlert('Could not contact the Instacram service.', 'modal-messages');
+          new_comment_button.addEventListener('click', this.postComment.bind(this, post_id, -1));
+          return false;
+        }
         new_comment_button.addEventListener('click', this.postComment.bind(this, post_id, post.comments.length));
         post.comments.sort((x, y) => x.published < y.published);
         for(const comment of post.comments) {
@@ -188,13 +220,31 @@ export default class Post {
     }
     this.api.postComment(this.token, post_id, comment)
       .then(response => {
+        if(!response) {
+          helpers.createAlert('Could not contact the Instacram service.', 'modal-messages');
+          return false;
+        }
         if(response.message !== "success") {
           helpers.createAlert(response.message, 'modal-messages');
           return false;
         }
         helpers.createAlert('Comment added successfully.', 'message-box', 'success');
         document.getElementById('comments-badge-' + post_id).innerText = `Comments: ${num_comments + 1}`;
+        if(num_comments === -1) {
+          this.updateCommentCount(post_id);
+        }
         $('#modal-popup').modal('hide');
+      });
+  }
+  
+  updateCommentCount(post_id) {
+    this.api.getPost(this.token, post_id)
+      .then(post => {
+        if(!post || !post.meta) {
+          helpers.createAlert('Could not contact the Instacram service.', 'modal-messages');
+          return false;
+        }
+        document.getElementById('comments-badge-' + post_id).innerText = `Comments: ${post.comments.length}`;
       });
   }
   
@@ -229,6 +279,10 @@ export default class Post {
   deletePost(post_id) {
     this.api.deletePost(this.token, post_id)
       .then(response => {
+        if(!response) {
+            helpers.createAlert('Could not contact the Instacram service.', 'message-box');
+            return false;
+          }
         if(response.message === 'success') {
           helpers.createAlert('You successfully deleted the post.', 'message-box', 'success');
         } else {
@@ -271,38 +325,33 @@ export default class Post {
     if(post_id) {
       this.api.updatePost(this.token, post_desc, this.current_image, post_id)
         .then(post => {
-          if(post.status !== 200) {
-            if(post.status === 400) {
-              helpers.createAlert('Malformed Request.', 'modal-messages');
-            } else if(post.status === 403) {
-              helpers.createAlert('Invalid Auth Token.', 'modal-messages');
-            } else if(post.status === 404) {
-              helpers.createAlert('Post Not Found.', 'modal-messages');
-            } else {
-              helpers.createAlert('An error occurred when submitting the update post form.', 'modal-messages');
-            }
-            return false;
-          }
-          
-          helpers.createAlert('The post has been updated.', 'message-box', 'success');
+          this.postMessages(post, 'update');
       });
     } else {
       this.api.createPost(this.token, post_desc, this.current_image)
         .then(post => {
-          if(post.status !== 200) {
-            if(post.status === 400) {
-              helpers.createAlert('Malformed Request.', 'modal-messages');
-            } else if(post.status === 403) {
-              helpers.createAlert('Invalid Auth Token.', 'modal-messages');
-            } else {
-              helpers.createAlert('An error occurred when submitting the create post form.', 'modal-messages');
-            }
-            return false;
-          }
-          
-          helpers.createAlert('The post has been created.', 'message-box', 'success');
+          this.postMessages(post, 'create');
       });
     }
+  }
+  
+  postMessages(post, type) {
+    if(!post) {
+      helpers.createAlert('Could not contact the Instacram service.', 'modal-messages');
+      return false;
+    }
+    if(post.status !== 200) {
+      if(post.status === 400) {
+        helpers.createAlert('Malformed Request.', 'modal-messages');
+      } else if(post.status === 403) {
+        helpers.createAlert('Invalid Auth Token.', 'modal-messages');
+      } else {
+        helpers.createAlert('An error occurred when submitting the ' + type + ' post form.', 'modal-messages');
+      }
+      return false;
+    }
+    
+    helpers.createAlert('The post has been ' + type + 'd.', 'message-box', 'success');
     $('#modal-popup').modal('hide');
   }
 }

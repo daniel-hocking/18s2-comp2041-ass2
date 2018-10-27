@@ -53,10 +53,11 @@ export function createAlert(message, parent_id, type = 'danger') {
   dismiss_button.appendChild(dismiss_cross);
   new_node.appendChild(dismiss_button);
   setTimeout(()=> {
-    if(parent_node.contains(new_node))
+    if(parent_node && parent_node.contains(new_node))
       parent_node.removeChild(new_node);
   }, 5000);
-  parent_node.appendChild(new_node);
+  if(parent_node)
+    parent_node.appendChild(new_node);
 }
 
 // From stackoverflow: https://stackoverflow.com/a/46181

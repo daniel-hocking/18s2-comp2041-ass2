@@ -98,6 +98,14 @@ export default class User {
     
     this.api.getUser(this.token, null, profile_username)
       .then(user => {
+        if(!user || !user.username) {
+          helpers.createAlert('Could not contact the Instacram service.', 'modal-messages');
+          basics_fieldset.appendChild(helpers.createElement('div', 'Could not load user details', { class: 'spaced-item' }));
+          following_fieldset.appendChild(helpers.createElement('div', 'Nobody yet', { class: 'spaced-item' }));
+          posts_fieldset.appendChild(helpers.createElement('div', 'None yet', { class: 'spaced-item' }));
+          return false;
+        }
+        
         if(my_profile) {
           basics_fieldset.appendChild(helpers.createElement('div', 'Username: ' + user.username, { class: 'spaced-item' }));
           const name_input = helpers.createElement('input', null, { id: 'name-profile-input', type: 'text', placeholder: 'name', value: user.name });
@@ -107,7 +115,7 @@ export default class User {
           const password_input = helpers.createElement('input', null, { id: 'password-profile-input', type: 'password', placeholder: 'password' });
           basics_fieldset.appendChild(helpers.createElement('div', 'Password: ', { class: 'spaced-item' }, password_input));
           
-          const update_profile_button = helpers.createElement('button', 'Update profile', { id: 'update-profile-button', type: 'button', class: 'btn btn-primary', 'data-dismiss': 'modal' });
+          const update_profile_button = helpers.createElement('button', 'Update profile', { id: 'update-profile-button', type: 'button', class: 'btn btn-primary' });
           update_profile_button.addEventListener('click', this.updateProfile.bind(this));
           basics_fieldset.appendChild(update_profile_button);
         } else {
@@ -195,6 +203,10 @@ export default class User {
     const message_id = user_id ? 'modal-messages' : 'message-box';
     this.api.unFollowUser(this.token, username)
       .then(follow => {
+          if(!follow) {
+            helpers.createAlert('Could not contact the Instacram service.', message_id);
+            return false;
+          }
           if(follow.status !== 200) {
             if(follow.status === 400) {
               helpers.createAlert('Malformed Request.', message_id);
@@ -221,6 +233,10 @@ export default class User {
     const message_id = 'modal-messages';
     this.api.followUser(this.token, username)
       .then(follow => {
+          if(!follow) {
+            helpers.createAlert('Could not contact the Instacram service.', message_id);
+            return false;
+          }
           if(follow.status !== 200) {
             if(follow.status === 400) {
               helpers.createAlert('Malformed Request.', message_id);
@@ -249,7 +265,25 @@ export default class User {
     const email_val = document.getElementById('email-profile-input').value;
     const password_val = document.getElementById('password-profile-input').value;
     
-    this.api.updateUser(this.token, name_val, email_val, password_val);
+    this.api.updateUser(this.token, name_val, email_val, password_val)
+      .then(user => {
+          if(!user) {
+            helpers.createAlert('Could not contact the Instacram service.', 'modal-messages');
+            return false;
+          }
+          if(user.status !== 200) {
+            if(user.status === 400) {
+              helpers.createAlert('Malformed user object.', 'modal-messages');
+            } else if(user.status === 403) {
+              helpers.createAlert('Invalid Authorization Token.', 'modal-messages');
+            } else {
+              helpers.createAlert('An error occurred when submitting the update user form.', 'modal-messages');
+            }
+            return false;
+          }
+          helpers.createAlert('User updated successfully.', 'message-box', 'success');
+          $('#modal-popup').modal('hide');
+      });
   }
   
   onSubmitLoginForm() {
@@ -264,6 +298,10 @@ export default class User {
       
       this.api.checkLogin(username, password)
         .then(login => {
+          if(!login) {
+            helpers.createAlert('Could not contact the Instacram service.', 'message-box');
+            return false;
+          }
           if(login.status !== 200) {
             if(login.status === 400) {
               helpers.createAlert('Missing Username/Password.', 'message-box');
@@ -302,6 +340,10 @@ export default class User {
 
       this.api.registerUser(register_username, register_password, register_email, register_name)
         .then(register => {
+          if(!register) {
+            helpers.createAlert('Could not contact the Instacram service.', 'message-box');
+            return false;
+          }
           if(register.status !== 200) {
             if(register.status === 400) {
               helpers.createAlert('Missing Username/Password.', 'message-box');
